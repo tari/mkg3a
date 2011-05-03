@@ -1,0 +1,25 @@
+#ifndef _CONFIG_H
+#define _CONFIG_H
+
+#include <stdint.h>
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+
+/* Version number */
+#define mkg3a_VERSION_MAJOR "@mkg3a_VERSION_MAJOR@"
+#define mkg3a_VERSION_MINOR "@mkg3a_VERSION_MINOR@"
+
+/* Size of blocks to read when copying and checksumming */
+#define FREAD_CHUNK 512
+
+/* Check whether the host sytem is big or little-endian. */
+#define IS_BIG_ENDIAN @IS_BIG_ENDIAN@
+
+/* Is unistd.h available for getopt?  Otherwise use a replacement. */
+#cmakedefine HAVE_UNISTD_H
+
+/* Should we use magickcore, or our basic .bmp handler? */
+#define USE_MAGICKCORE @USE_MAGICKCORE@
+
+#endif /* _CONFIG_H */

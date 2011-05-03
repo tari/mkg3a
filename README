@@ -1,0 +1,31 @@
+mkg3a 0.1b
+Copyright 2011 Peter Marheine <peter@taricorp.net>
+
+mkg3a is a tool to pack raw binaries into Casio Prizm .g3a (add-in) files.
+
+== Quickstart ==
+
+Build and install to /usr/local:
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+$ make install
+
+== Compiling ==
+
+Configure mkg3a with cmake, as in the quickstart.  Use cmake -i or your
+favorite cmake UI (such as ccmake) to customize the configuration.
+
+== Usage ==
+
+Run mkg3a -h for help.
+
+To build useful programs, you might do something like the following (requires
+a GNU toolchain configured for sh4nofpu as well as crt0 and the g3a.lkr linker
+script):
+
+$ sh4nofpu-elf-gcc -c -o crt0.o crt0.s
+$ sh4nofpu-elf-gcc -c -o myprogram.o myprogram.c
+$ sh4nofpu-elf-ld -T g3a.lkr -o myprogram.bin myprogram.o crt0.o
+$ mkg3a myprogram.bin

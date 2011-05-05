@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,6 +5,7 @@
 
 #include "config.h"
 #include "icon.h"
+#include "util.h"
 
 static char *bmperror;
 
@@ -31,9 +31,8 @@ u16 *loadBitmap(const char *path) {
 		return NULL;
 	}
 
-	bh = malloc(sizeof(*bh));
-	dh = malloc(sizeof(*dh));
-	assert(bh != NULL && dh != NULL);
+	bh = mallocs(sizeof(*bh));
+	dh = mallocs(sizeof(*dh));
 	err = readBMPHeader(bh, dh, fp);
 	free(bh);
 	free(dh);
@@ -42,8 +41,7 @@ u16 *loadBitmap(const char *path) {
 		return NULL;
 	}
 
-	data = malloc(ICON_WIDTH * 3 * ICON_HEIGHT);
-	assert(data != NULL);
+	data = mallocs(ICON_WIDTH * 3 * ICON_HEIGHT);
 	if (readBMPData(data, fp)) {
 		printf("Error reading image: %s\n", bmperror);
 		free(data);
@@ -79,7 +77,8 @@ int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp) {
 	if (h->ncolors != 0)
 		BMPFAIL("Palette not supported");
 	// Seek to image data
-	assert(fseek(fp, h->header_size - sz, SEEK_CUR) == 0);
+	if (fseek(fp, h->header_size - sz, SEEK_CUR) != 0)
+		BMPFAIL("fseek returned abnormally");
 	return 0;
 }
 
@@ -156,8 +155,7 @@ void writeBitmap(const char *path, u16 *data, int w, int h) {
 	fwrite(&dh, sizeof(dh), 1, fp);
 
 	// Convert image data to 24bpp BGR and invert scan
-	cdata = malloc(3 * w * h);
-	assert(cdata != NULL);
+	cdata = mallocs(3 * w * h);
 	for (y = 0; y < h; y++) {
 		u8 *destRow = cdata + w * 3 * (h - 1 - y);
 		for (x = 0; x < w; x++) {

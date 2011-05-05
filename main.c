@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <errno.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,7 +101,8 @@ int splitKV(char *opt, char **k, char **v) {
 	*t++ = 0;
 	*k = opt;
 	*v = strdup(t);
-	assert(*k != NULL && *v != NULL);
+	if (*v == NULL)
+		return 1;		// FIXME not descriptive enough
 	return 0;
 }
 

@@ -1,3 +1,6 @@
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "config.h"
@@ -45,4 +48,22 @@ void dump_u32(u32 v, u32 *loc) {
         | (v << 8 & 0xFF0000) | (v << 24 & 0xFF000000);
 #endif
     *loc = v;
+}
+
+void *mallocs(size_t size) {
+	void *r = malloc(size);
+	if (r == NULL) {
+		printf("Failed to allocate memory; aborting.\n");
+		exit(2);
+	}
+	return r;
+}
+
+void *callocs(size_t count, size_t size) {
+	void *r = calloc(count, size);
+	if (r == NULL) {
+		printf("Failed to allocate memory; aborting.\n");
+		exit(2);
+	}
+	return r;
 }

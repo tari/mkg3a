@@ -132,8 +132,7 @@ struct g3a_header *g3a_mkHeader(int type) {
     u8 MAGIC[] = {0xAA, 0xAC, 0xBD, 0xAF, 0x90, 0x88, 0x9A,
                   0x8D, 0xD3, 0xFF, 0xFE, 0xFF, 0xFE, 0xFF};
 
-    struct g3a_header *h = calloc(1, sizeof(struct g3a_header));
-    assert(h != NULL);
+    struct g3a_header *h = callocs(1, sizeof(struct g3a_header));
 
     memcpy(h->magic, MAGIC, sizeof(MAGIC));
     h->_pad3[0] = 0x01;

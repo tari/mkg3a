@@ -31,7 +31,7 @@ struct g3a_header {
     /* 0x005C Size of entire file */
     u32 size;
     /* 0x0060 Internal name, all-caps with @, like @CONV */
-    unsigned char name_internal[0xB];
+    char name_internal[0xB];
     /* 0x006B - 0x012F Localized names */
     union {
     	char lc_names[8][0x18];

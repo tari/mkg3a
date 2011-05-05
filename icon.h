@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "config.h"
 
 #ifndef _ICON_H
@@ -41,7 +42,8 @@ struct icons {
 u16 *loadBitmap(const char *path);
 int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp);
 int readBMPData(u8 *d, FILE *fp);
-u8 convertChannelDepth(u8 c, char depth);
+u8 convertChannelDepth(u8 c, u8 cd, u8 dd);
 u16 *convertBPP(u8 *d);
+void writeBitmap(const char *path, u16 *data, int w, int h);
 
 #endif /* _ICON_H */

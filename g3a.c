@@ -98,8 +98,7 @@ void g3a_fillNames(struct g3a_header *h, struct lc_names *names) {
 			sizeof(h->name_internal - 2));
 	h->name_internal[0] = '@';
 	for (i = 0; i < sizeof(h->name_internal) - 1; i++) {
-		unsigned char c = toupper(h->name_internal[i]);
-		h->name_internal[i] = c;
+		h->name_internal[i] = toupper(h->name_internal[i]);
 	}
 
 	for (i = 0; i < sizeof(h->lc_names) / sizeof(h->name_en); i++) {
@@ -161,7 +160,10 @@ u32 g3a_processRaw(const char *inFile, FILE *outFile, u32 *size) {
 	FILE *inFP;
 
     inFP = fopen(inFile, "rb");
-    assert(inFP != NULL);
+	if (inFP == NULL) {
+		printf("Failed to open input file for reading!\n");
+		return 0;
+	}
 
     *size = 0;
     do {

@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
 	int args = 0;
 	char *inFN, *outFN;
 	struct lc_names names = {{{NULL}}};
-	struct icons icons;
+	struct icons icons = {{0}, {0}, {0}};
 
 	while ((c = getopt(argc, argv, ":n:i:hv")) != -1) {
 		switch(c) {

@@ -97,9 +97,9 @@ int readBMPData(u8 *d, FILE *fp) {
 	return 0;
 }
 
-u8 convertChannelDepth(u8 c, char depth) {
-	float v = c / 255.0;
-	v *= (1 << depth) - 1;
+u8 convertChannelDepth(u8 c, u8 cd, u8 dd) {
+	float v = (float)c / ((1 << cd) - 1);
+	v *= (1 << dd) - 1;
 	return (u8)v;
 }
 
@@ -113,9 +113,9 @@ u16 *convertBPP(u8 *d) {
 	char r, g, b;
 
 	for (pxi = 0; pxi < ICON_HEIGHT * ICON_WIDTH; pxi++) {
-		b = convertChannelDepth(d[pxi * 3], 5);
-		g = convertChannelDepth(d[pxi * 3 + 1], 6);
-		r = convertChannelDepth(d[pxi * 3 + 2], 5);
+		b = convertChannelDepth(d[pxi * 3], 8, 5);
+		g = convertChannelDepth(d[pxi * 3 + 1], 8, 6);
+		r = convertChannelDepth(d[pxi * 3 + 2], 8, 5);
 
 		px = (r << 11) | (g << 5) | b;
 		// Write as big-endian
@@ -123,6 +123,58 @@ u16 *convertBPP(u8 *d) {
 		d[2 * pxi + 1] = px & 0xFF;
 	}
 	return realloc(d, 2 * ICON_HEIGHT * ICON_WIDTH);
+}
+
+
+void writeBitmap(const char *path, u16 *data, int w, int h) {
+	u8 *cdata;
+	int x, y;
+	u32 imgSize = w * h * 3;
+	struct bmp_header bh = {
+		0x4D42,												// Signature
+		imgSize + sizeof(bh) + sizeof(struct dib_header),	// File size
+		0, 0,												// Reserved
+		sizeof(bh) + sizeof(struct dib_header)				// Pixel data offset
+	};
+	struct dib_header dh = {
+		40,										// DIB header size
+		w, h,									// Dimensions
+		1,										// Number of planes
+		24,										// BPP
+		0,										// Compression
+		imgSize,								// Pixel array size
+		1, 1,									// Pixels per meter, X/Y
+		0, 0									// Color junk we don't care about
+	};
+	FILE *fp = fopen(path, "wb");
+	if (fp == NULL) {
+		printf("Failed to open file for writing: %s\n", strerror(errno));
+		return;
+	}
+	// Headers, sigh
+	fwrite(&bh, sizeof(bh), 1, fp);
+	fwrite(&dh, sizeof(dh), 1, fp);
+
+	// Convert image data to 24bpp BGR and invert scan
+	cdata = malloc(3 * w * h);
+	assert(cdata != NULL);
+	for (y = 0; y < h; y++) {
+		u8 *destRow = cdata + w * 3 * (h - 1 - y);
+		for (x = 0; x < w; x++) {
+			u8 r, g, b;
+			u16 px = data[w * y + x];
+			px = (px << 8 & 0xFF00) | px >> 8;
+			r = convertChannelDepth((px >> 11) & 0x1F, 5, 8);
+			g = convertChannelDepth((px >> 5) & 0x3F, 6, 8);
+			b = convertChannelDepth(px & 0x1F, 5, 8);
+			destRow[3 * x] = b;
+			destRow[3 * x + 1] = g;
+			destRow[3 * x + 2] = r;
+		}
+	}
+	fwrite(cdata, 3, w * h, fp);
+	free(cdata);
+	fclose(fp);
 }
 
 #endif /* USE_MAGICKCORE */

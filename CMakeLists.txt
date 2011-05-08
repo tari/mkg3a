@@ -21,7 +21,7 @@ endif ()
 
 ## Configuration
 set (mkg3a_VERSION_MAJOR 0)
-set (mkg3a_VERSION_MINOR 1c)
+set (mkg3a_VERSION_MINOR 1d)
 
 configure_file (
 	"${PROJECT_SOURCE_DIR}/config.h.in"
@@ -38,4 +38,6 @@ if (NOT HAVE_UNISTD_H)
     target_link_libraries (mkg3a getopt)
 endif ()
 
-install (TARGETS mkg3a DESTINATION bin)
+add_executable (g3a-icodump icodump.c icon.c util.c)
+
+install (TARGETS mkg3a g3a-icodump DESTINATION bin)

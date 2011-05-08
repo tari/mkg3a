@@ -98,7 +98,7 @@ void g3a_fillNames(struct g3a_header *h, struct lc_names *names) {
 			sizeof(h->name_internal - 2));
 	h->name_internal[0] = '@';
 	for (i = 0; i < sizeof(h->name_internal) - 1; i++) {
-		h->name_internal[i] = toupper(h->name_internal[i]);
+		h->name_internal[i] = toupper((int)h->name_internal[i]);
 	}
 
 	for (i = 0; i < sizeof(h->lc_names) / sizeof(h->name_en); i++) {

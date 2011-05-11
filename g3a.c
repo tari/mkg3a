@@ -163,6 +163,12 @@ u32 g3a_processRaw(const char *inFile, FILE *outFile, u32 *size) {
 		printf("Failed to open input file for reading!\n");
 		return 0;
 	}
+	fseek(inFP, 0, SEEK_END);
+	if (ftell(inFP) > 0x01000000) {
+		printf("Cowardly refusing to operating on input file larger than 16MB.\n");
+		return 0;
+	}
+	rewind(inFP);
 
     *size = 0;
     do {

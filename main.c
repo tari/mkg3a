@@ -184,13 +184,10 @@ int main(int argc, char **argv) {
 
 	if (names.basic == NULL)
 		names.basic = strdup(outFN);
-	g3a_mkG3A(inFN, outFN, &names, &icons);
+	if (g3a_mkG3A(inFN, outFN, &names, &icons)) {
+		printf("Operation failed.  Output file is probably broken.\n");
+		return 1;
+	}
 
 	return 0;
-
-/*
- *
- * --version mkg3a_VERSION_MAJOR mkg3a_VERSION_MINOR
- * 		Built __DATE__ __TIME__
- */
 }

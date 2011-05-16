@@ -15,6 +15,8 @@
  * names is an array of strings giving names to insert:
  *		short internal en es de fr pt zh en en
  * NULL names will be left blank.
+ *
+ * Returns 0 on success, nonzero otherwise.
  */
 int g3a_mkG3A(const char *inFile, const char *outFile,
 			  struct lc_names *names, struct icons *icons) {
@@ -23,15 +25,18 @@ int g3a_mkG3A(const char *inFile, const char *outFile,
     const char *baseName;
 
     FILE *outFP = fopen(outFile, "wb");
-    if (!outFP) {
+    if (outFP == NULL) {
         printf("Unable to open output file: %s\n", strerror(errno));
         return 1;
     }
 
     fseek(outFP, sizeof(struct g3a_header), SEEK_SET);
-    cksum = g3a_processRaw(inFile, outFP, &inSize);
+    if (g3a_processRaw(inFile, outFP, &inSize, &cksum))
+		return 1;
 
     header = g3a_mkHeader(1);
+	if (header == NULL)
+		return 1;
     g3a_fillSize(header, inSize);
     g3a_fillCProt(header, 2);
     g3a_fillIcons(header, icons);
@@ -41,7 +46,7 @@ int g3a_mkG3A(const char *inFile, const char *outFile,
 	g3a_fillNames(header, names);
 
     cksum += checksum(header, sizeof(struct g3a_header));
-    dump_u32(cksum, &header->cksum);
+    dumpb_u32(cksum, &header->cksum);
 	fwrite(&header->cksum, sizeof(header->cksum), 1, outFP);
 
 	// Write header
@@ -145,15 +150,15 @@ struct g3a_header *g3a_mkHeader(int type) {
 void g3a_fillSize(struct g3a_header *h, u32 codeSize) {
 	u32 outSize;
 
-    dump_u32(codeSize, &h->cksum2_ofs);
+    dumpb_u32(codeSize, &h->cksum2_ofs);
     outSize = codeSize + 0x7004;
-    dump_u32(outSize, &h->size);
+    dumpb_u32(outSize, &h->size);
 }
 /*
  * Read inFile, checksum it, and write the contents into outFile.
  */
-u32 g3a_processRaw(const char *inFile, FILE *outFile, u32 *size) {
-    u32 cksum = 0;
+int g3a_processRaw(const char *inFile, FILE *outFile, u32 *size, u32 *cksum) {
+    u32 sum = 0;
     u8 buf[FREAD_CHUNK];
     size_t rsize;
 	FILE *inFP;
@@ -161,12 +166,12 @@ u32 g3a_processRaw(const char *inFile, FILE *outFile, u32 *size) {
     inFP = fopen(inFile, "rb");
 	if (inFP == NULL) {
 		printf("Failed to open input file for reading!\n");
-		return 0;
+		return 1;
 	}
 	fseek(inFP, 0, SEEK_END);
 	if (ftell(inFP) > 0x01000000) {
 		printf("Cowardly refusing to operating on input file larger than 16MB.\n");
-		return 0;
+		return 1;
 	}
 	rewind(inFP);
 
@@ -174,11 +179,12 @@ u32 g3a_processRaw(const char *inFile, FILE *outFile, u32 *size) {
     do {
         // Read a chunk, update checksum, write
         rsize = fread(buf, 1, FREAD_CHUNK, inFP);
-        cksum += checksum(buf, rsize);
+        sum += checksum(buf, rsize);
         fwrite(buf, rsize, 1, outFile);
         *size += rsize;
     } while (rsize == FREAD_CHUNK);
 
     fclose(inFP);
-    return cksum;
+	*cksum = sum;
+    return 0;
 }

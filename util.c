@@ -32,24 +32,60 @@ u32 checksum(const void *ptr, size_t bytes) {
     return sum;
 }
 
-/*
- * Endianness wrappers for dumping non-byte values
- */
-void dump_u16(u16 v, u16 *loc) {
-#if !IS_BIG_ENDIAN
-    v = (v >> 8) | (v << 8 & 0xFF);
-#endif
-    *loc = v;
+// Flip endianness of v
+u32 u32_flip(u32 v) {
+    return (v >> 24 & 0xFF) | (v >> 8 & 0xFF00)
+           | (v << 8 & 0xFF0000) | (v << 24 & 0xFF000000);
 }
-void dump_u32(u32 v, u32 *loc) {
-#if !IS_BIG_ENDIAN
-    // Convert to big-endian
-    v = (v >> 24 & 0xFF) | (v >> 8 & 0xFF00)
-        | (v << 8 & 0xFF0000) | (v << 24 & 0xFF000000);
-#endif
-    *loc = v;
+u16 u16_flip(u16 v) {
+    return (v >> 8) | (v << 8 & 0xFF);
 }
 
+// Native byte order to big-endian
+__inline u32 u32_ntobe(u32 v) {
+#if !IS_BIG_ENDIAN
+    return u32_flip(v);
+#else
+	return v;
+#endif
+}
+__inline u16 u16_ntobe(u16 v) {
+#if !IS_BIG_ENDIAN
+    return u16_flip(v);
+#else
+	return v;
+#endif
+}
+// Native byte order to little-endian
+__inline u32 u32_ntole(u32 v) {
+#if IS_BIG_ENDIAN
+    return u32_flip(v);
+#else
+	return v;
+#endif
+}
+__inline u16 u16_ntole(u16 v) {
+#if IS_BIG_ENDIAN
+    return u16_flip(v);
+#else
+	return v;
+#endif
+}
+
+/*
+ * Endianness wrappers for dumping non-byte values as big-endian
+ */
+void dumpb_u16(u16 v, u16 *loc) {
+    *loc = u16_ntobe(v);
+}
+void dumpb_u32(u32 v, u32 *loc) {
+    *loc = u32_ntobe(v);
+}
+
+
+/*
+ * 'safe' wrappers for malloc and friends
+ */
 void *mallocs(size_t size) {
 	void *r = malloc(size);
 	if (r == NULL) {
@@ -58,7 +94,6 @@ void *mallocs(size_t size) {
 	}
 	return r;
 }
-
 void *callocs(size_t count, size_t size) {
 	void *r = calloc(count, size);
 	if (r == NULL) {

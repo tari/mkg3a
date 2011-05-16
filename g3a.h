@@ -106,7 +106,7 @@ struct lc_names {
 int g3a_mkG3A(const char *inFile, const char *outFile,
 			  struct lc_names *names, struct icons *icons);
 struct g3a_header *g3a_mkHeader(int type);
-u32 g3a_processRaw(const char *inFile, FILE *outFile, u32 *size);
+int g3a_processRaw(const char *inFile, FILE *outFile, u32 *size, u32 *cksum);
 
 /* Processing bits of the file */
 void g3a_fillCProt(struct g3a_header *h, int type);

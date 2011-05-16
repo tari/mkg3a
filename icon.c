@@ -13,10 +13,6 @@ static char *bmperror;
 #error MagickCore support not implemented.
 #else
 
-#if IS_BIG_ENDIAN
-#error Bitmap handler is not endianness-independent
-#endif /* IS_BIG_ENDIAN */
-
 #define BMPFAIL(s) { bmperror = s; return 1; }
 
 u16 *loadBitmap(const char *path) {
@@ -52,6 +48,23 @@ u16 *loadBitmap(const char *path) {
 	return convertBPP(data);
 }
 
+/*
+ * Inverts endianness of the given DIB header
+ */
+static void dibHeader_convert(struct dib_header *h) {
+	h->header_size = u32_flip(h->header_size);
+	h->width = u32_flip(h->width);
+	h->height = u32_flip(h->height);
+	h->nplanes = u16_flip(h->nplanes);
+	h->bpp = u16_flip(h->bpp);
+	//h->compress_type = u32_flip(h->compress_type);	// != 0 fails
+	//h->bmp_byte_size = u32_flip(h->bmp_byte_size);	// ignored
+	//h->hres = u32_flip(h->bmp_byte_size);
+	//h->vres = u32_flip(h->vres);
+	//h->ncolors = u32_flip(h->ncolors);				// != 0 fails
+	//h->nimpcolors = u32_flip(h->nimpcolors);			// ignored
+}
+
 int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp) {
 	size_t sz;
 
@@ -59,11 +72,15 @@ int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp) {
 	sz = fread(bh, 1, sizeof(*bh), fp);
 	if (sz != sizeof(*bh))
 		BMPFAIL("Strange BMP header");
-	if (bh->signature != 0x4D42) // "BM" little-endian
+	if (bh->signature[0] != 0x42 || bh->signature[1] != 0x4D)	// "BM"
 		BMPFAIL("Not a BMP file");
 
 	// DIB header
 	sz = fread(h, 1, sizeof(*h), fp);
+#if IS_BIG_ENDIAN
+	dibHeader_convert(h);
+#endif
+
 	if (sz < sizeof(*h))
 		BMPFAIL("Strange DIB header");
 	if (h->width != ICON_WIDTH || h->height != ICON_HEIGHT)
@@ -76,6 +93,7 @@ int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp) {
 		BMPFAIL("Unsupported compression");
 	if (h->ncolors != 0)
 		BMPFAIL("Palette not supported");
+
 	// Seek to image data
 	if (fseek(fp, h->header_size - sz, SEEK_CUR) != 0)
 		BMPFAIL("fseek returned abnormally");
@@ -96,6 +114,10 @@ int readBMPData(u8 *d, FILE *fp) {
 	return 0;
 }
 
+/**
+ * Converts channel data c from depth cd (in bits) to depth dd.
+ * Behaviour is undefined if either bit depth is large (around 31 usually).
+ */
 u8 convertChannelDepth(u8 c, u8 cd, u8 dd) {
 	float v = (float)c / ((1 << cd) - 1);
 	v *= (1 << dd) - 1;

@@ -152,7 +152,7 @@ void writeBitmap(const char *path, u16 *data, int w, int h) {
 	int x, y;
 	u32 imgSize = w * h * 3;
 	struct bmp_header bh = {
-		0x4D42,												// Signature
+		{0x42, 0x4D},										// Signature
 		imgSize + sizeof(bh) + sizeof(struct dib_header),	// File size
 		0, 0,												// Reserved
 		sizeof(bh) + sizeof(struct dib_header)				// Pixel data offset

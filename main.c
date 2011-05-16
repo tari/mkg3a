@@ -176,7 +176,10 @@ int main(int argc, char **argv) {
 		if (t != NULL)
 			*t = 0;
 
-		realloc(outFN, strlen(outFN) + strlen(".g3a") + 1);
+		if (realloc(outFN, strlen(outFN) + strlen(".g3a") + 1) == NULL) {
+			printf("realloc failed on filename (OOM?).  Giving up.\n");
+			return 2;
+		}
 		strcat(outFN, ".g3a");
 	} else {
 		outFN = argv[optind + 1];
@@ -186,7 +189,7 @@ int main(int argc, char **argv) {
 		names.basic = strdup(outFN);
 	if (g3a_mkG3A(inFN, outFN, &names, &icons)) {
 		printf("Operation failed.  Output file is probably broken.\n");
-		return 1;
+		return 2;
 	}
 
 	return 0;

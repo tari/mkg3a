@@ -18,10 +18,20 @@ else ()
     message (STATUS "Using built-in bmp handler for icon support")
 endif ()
 
+execute_process( COMMAND hg tip --template "{tags} {rev}:{node|short}"
+                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                 OUTPUT_VARIABLE HG_TIP )
+string( REGEX MATCH "^ ?[^ ]+"
+        HG_TAG "${HG_TIP}" )
+if( ${HG_TAG} STREQUAL tip )
+	string( REGEX MATCH "[^ ]+$"
+		HG_TAG "${HG_TIP}" )
+	set( HG_TAG "hg ${HG_TAG}" )
+endif()
+message( STATUS "Version: ${HG_TAG}" )
 
 ## Configuration
-set (mkg3a_VERSION_MAJOR 0)
-set (mkg3a_VERSION_MINOR 1d)
+set (mkg3a_VERSION_TAG ${HG_TAG})
 
 configure_file (
 	"${PROJECT_SOURCE_DIR}/config.h.in"

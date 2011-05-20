@@ -27,7 +27,7 @@ char *USAGE =
 	"\nMultiple -n or -i options will all be applied, with the last\n"
 	"specified option overriding previous ones with the same key.";
 char *VERSION =
-	"mkg3a " mkg3a_VERSION_MAJOR "." mkg3a_VERSION_MINOR
+	"mkg3a " mkg3a_VERSION_TAG
 	" (" __DATE__ " " __TIME__ ")\n"
 	"Copyright (c) 2011 Peter Marheine <peter@taricorp.net>\n"
 	"\nThis is free software; see the source for copying conditions.  There\n"

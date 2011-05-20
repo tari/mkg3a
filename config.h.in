@@ -7,8 +7,7 @@ typedef uint16_t u16;
 typedef uint32_t u32;
 
 /* Version number */
-#define mkg3a_VERSION_MAJOR "@mkg3a_VERSION_MAJOR@"
-#define mkg3a_VERSION_MINOR "@mkg3a_VERSION_MINOR@"
+#define mkg3a_VERSION_TAG "@mkg3a_VERSION_TAG@"
 
 /* Size of blocks to read when copying and checksumming */
 #define FREAD_CHUNK 512

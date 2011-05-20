@@ -38,7 +38,7 @@ int g3a_mkG3A(const char *inFile, const char *outFile,
 	if (header == NULL)
 		return 1;
     g3a_fillSize(header, inSize);
-    g3a_fillCProt(header, 2);
+    g3a_fillCProt(header);
     g3a_fillIcons(header, icons);
 
     baseName = basename(outFile);
@@ -60,20 +60,13 @@ int g3a_mkG3A(const char *inFile, const char *outFile,
 /*
  * Fills in copy protection field, depends on size
  */
-void g3a_fillCProt(struct g3a_header *h, int type) {
+void g3a_fillCProt(struct g3a_header *h) {
     u32 *cprot = (u32 *)&h->cprot[2];
-
-    assert(type == 1 || type == 2);
-    if (type == 1) {
-        h->cprot[0] = 0x16;
-        h->cprot[6] = 0x9F;
-    } else {
-        h->cprot[0] = 0xC2;
-        h->cprot[6] = 0x4B;
-    }
-    h->cprot[1] = 0xFE;
-
     *cprot = ~h->size;  // Already written big-endian once
+
+	h->cprot[0] = h->cprot[5] - 0x41;
+    h->cprot[1] = 0xFE;
+	h->cprot[6] = h->cprot[5] - 0xB1;
 }
 
 /*

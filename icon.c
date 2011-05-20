@@ -148,6 +148,7 @@ u16 *convertBPP(u8 *d) {
 
 
 void writeBitmap(const char *path, u16 *data, int w, int h) {
+	// TODO: don't write broken files on big-endian systems
 	u8 *cdata;
 	int x, y;
 	u32 imgSize = w * h * 3;

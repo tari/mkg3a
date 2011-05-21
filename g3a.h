@@ -109,7 +109,7 @@ struct g3a_header *g3a_mkHeader(int type);
 int g3a_processRaw(const char *inFile, FILE *outFile, u32 *size, u32 *cksum);
 
 /* Processing bits of the file */
-void g3a_fillCProt(struct g3a_header *h, int type);
+void g3a_fillCProt(struct g3a_header *h);
 void g3a_fillIcons(struct g3a_header *h, struct icons *icons);
 void g3a_fillNames(struct g3a_header *h, struct lc_names *names);
 void g3a_fillSize(struct g3a_header *h, u32 codeSize);

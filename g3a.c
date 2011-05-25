@@ -66,7 +66,7 @@ void g3a_fillCProt(struct g3a_header *h) {
 
 	h->cprot[0] = h->cprot[5] - 0x41;
     h->cprot[1] = 0xFE;
-	h->cprot[6] = h->cprot[5] - 0xB1;
+	h->cprot[6] = h->cprot[5] - 0xB8;
 }
 
 /*
@@ -106,7 +106,7 @@ void g3a_fillNames(struct g3a_header *h, struct lc_names *names) {
 			src = names->localized[i];
 		}
 		strncpy((char *)&h->lc_names[i], src, sizeof(h->lc_names[i]) - 1);
-		strncpy((char *)&h->lc_lnames[i], src, sizeof(h->lc_lnames[i]) - 1);
+		//strncpy((char *)&h->lc_lnames[i], src, sizeof(h->lc_lnames[i]) - 1);
 	}
 }
 

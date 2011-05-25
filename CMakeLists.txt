@@ -18,16 +18,11 @@ else ()
     message (STATUS "Using built-in bmp handler for icon support")
 endif ()
 
-execute_process( COMMAND hg tip --template "{tags} {rev}:{node|short}"
+execute_process( COMMAND hg parent --template "{tags} {node}"
                  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                 OUTPUT_VARIABLE HG_TIP )
+                 OUTPUT_VARIABLE HG_PARENT )
 string( REGEX MATCH "^ ?[^ ]+"
-        HG_TAG "${HG_TIP}" )
-if( ${HG_TAG} STREQUAL tip )
-	string( REGEX MATCH "[^ ]+$"
-		HG_TAG "${HG_TIP}" )
-	set( HG_TAG "hg ${HG_TAG}" )
-endif()
+        HG_TAG "${HG_PARENT}" )
 message( STATUS "Version: ${HG_TAG}" )
 
 ## Configuration

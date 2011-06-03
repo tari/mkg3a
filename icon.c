@@ -52,11 +52,11 @@ u16 *loadBitmap(const char *path) {
  * Inverts endianness of the given DIB header
  */
 static void dibHeader_convert(struct dib_header *h) {
-	h->header_size = u32_flip(h->header_size);
-	h->width = u32_flip(h->width);
-	h->height = u32_flip(h->height);
-	h->nplanes = u16_flip(h->nplanes);
-	h->bpp = u16_flip(h->bpp);
+	h->header_size = u32_ntole(h->header_size);
+	h->width = u32_ntole(h->width);
+	h->height = u32_ntole(h->height);
+	h->nplanes = u16_ntole(h->nplanes);
+	h->bpp = u16_ntole(h->bpp);
 	//h->compress_type = u32_flip(h->compress_type);	// != 0 fails
 	//h->bmp_byte_size = u32_flip(h->bmp_byte_size);	// ignored
 	//h->hres = u32_flip(h->bmp_byte_size);

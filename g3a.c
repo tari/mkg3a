@@ -82,7 +82,7 @@ void g3a_fillIcons(struct g3a_header *h, struct icons *icons) {
  * are required.
  */
 void g3a_fillNames(struct g3a_header *h, struct lc_names *names) {
-	int i;
+	unsigned int i;
 	char *src;
 
 	strncpy(h->name_basic, names->basic, sizeof(h->name_basic) - 1);

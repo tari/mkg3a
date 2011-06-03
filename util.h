@@ -6,9 +6,6 @@ u32 checksum(const void *ptr, size_t bytes);
 void *mallocs(size_t size);
 void *callocs(size_t count, size_t size);
 
-u16 u16_flip(u16 v);
-u32 u32_flip(u32 v);
-
 void dumpb_u16(u16 v, u16 *loc);
 void dumpb_u32(u32 v, u32 *loc);
 u32 u32_ntobe(u32 v);

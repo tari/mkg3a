@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project (mkg3a)
+add_definitions(-Wall -Wextra)
 
 ## Feature checks
 include (TestBigEndian)

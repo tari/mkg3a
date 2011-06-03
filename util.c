@@ -5,6 +5,9 @@
 
 #include "config.h"
 
+static inline u32 u32_flip(u32 v);
+static inline u16 u16_flip(u16 v);
+
 /*
  * Get file part of path, returning the beginning of basename or NULL if
  * path is a directory.
@@ -33,23 +36,23 @@ u32 checksum(const void *ptr, size_t bytes) {
 }
 
 // Flip endianness of v
-u32 u32_flip(u32 v) {
+static inline u32 u32_flip(u32 v) {
     return (v >> 24 & 0xFF) | (v >> 8 & 0xFF00)
            | (v << 8 & 0xFF0000) | (v << 24 & 0xFF000000);
 }
-u16 u16_flip(u16 v) {
+static inline u16 u16_flip(u16 v) {
     return (v >> 8) | (v << 8 & 0xFF);
 }
 
 // Native byte order to big-endian
-__inline u32 u32_ntobe(u32 v) {
+u32 u32_ntobe(u32 v) {
 #if !IS_BIG_ENDIAN
     return u32_flip(v);
 #else
 	return v;
 #endif
 }
-__inline u16 u16_ntobe(u16 v) {
+u16 u16_ntobe(u16 v) {
 #if !IS_BIG_ENDIAN
     return u16_flip(v);
 #else
@@ -57,14 +60,14 @@ __inline u16 u16_ntobe(u16 v) {
 #endif
 }
 // Native byte order to little-endian
-__inline u32 u32_ntole(u32 v) {
+u32 u32_ntole(u32 v) {
 #if IS_BIG_ENDIAN
     return u32_flip(v);
 #else
 	return v;
 #endif
 }
-__inline u16 u16_ntole(u16 v) {
+u16 u16_ntole(u16 v) {
 #if IS_BIG_ENDIAN
     return u16_flip(v);
 #else

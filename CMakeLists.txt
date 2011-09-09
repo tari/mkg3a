@@ -19,11 +19,15 @@ else ()
     message (STATUS "Using built-in bmp handler for icon support")
 endif ()
 
-execute_process( COMMAND hg parent --template "{tags} {node}"
+execute_process( COMMAND hg id -t
                  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                 OUTPUT_VARIABLE HG_PARENT )
-string( REGEX MATCH "^ ?[^ ]+"
-        HG_TAG "${HG_PARENT}" )
+                 OUTPUT_VARIABLE HG_TAG OUTPUT_STRIP_TRAILING_WHITESPACE )
+string( LENGTH "${HG_TAG}" HG_TAGLEN )
+if ( HG_TAG STREQUAL tip OR NOT HG_TAGLEN )
+    execute_process( COMMAND hg id -i
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     OUTPUT_VARIABLE HG_TAG OUTPUT_STRIP_TRAILING_WHITESPACE )
+endif()
 message( STATUS "Version: ${HG_TAG}" )
 
 ## Configuration

@@ -39,7 +39,7 @@ struct icons {
 	u16 mono[ICON_MONO_WIDTH * ICON_MONO_HEIGHT];
 };
 
-u16 *loadBitmap(const char *path);
+u16 *loadBitmap(const char *path, int32_t *width, int32_t *height);
 int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp);
 int readBMPData(u8 *d, FILE *fp);
 u8 convertChannelDepth(u8 c, u8 cd, u8 dd);

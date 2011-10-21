@@ -68,6 +68,7 @@ int storeNameSpec(char *k, char *v, void *dest) {
 
 int storeIconSpec(char *k, char *v, void *dest) {
 	struct icons *icons = (struct icons *)dest;
+    int32_t width, height;
 	u16 *idat;
 	void *cd;
 
@@ -79,9 +80,15 @@ int storeIconSpec(char *k, char *v, void *dest) {
 		return 1;
 	}
 
-	idat = loadBitmap(v);
+	idat = loadBitmap(v, &width, &height);
 	if (idat == NULL)
 		return 1;
+    if (width != ICON_WIDTH || height != ICON_HEIGHT) {
+        fprintf(stderr, "Dimensions of %s are invalid,", v);
+        fprintf(stderr, " icons must be %ix%i pixels.\n",
+                ICON_WIDTH, ICON_HEIGHT);
+        return 1;
+    }
 	memcpy(cd, idat, sizeof(icons->unselected));
 	free(idat);
 	free(v);

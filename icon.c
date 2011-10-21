@@ -15,7 +15,7 @@ static char *bmperror;
 
 #define BMPFAIL(s) { bmperror = s; return 1; }
 
-u16 *loadBitmap(const char *path) {
+u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
 	struct bmp_header *bh;
 	struct dib_header *dh;
 	int err = 0;
@@ -30,6 +30,8 @@ u16 *loadBitmap(const char *path) {
 	bh = mallocs(sizeof(*bh));
 	dh = mallocs(sizeof(*dh));
 	err = readBMPHeader(bh, dh, fp);
+    *width = dh->width;
+    *height = dh->height;
 	free(bh);
 	free(dh);
 	if (err) {
@@ -83,8 +85,6 @@ int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp) {
 
 	if (sz < sizeof(*h))
 		BMPFAIL("Strange DIB header");
-	if (h->width != ICON_WIDTH || h->height != ICON_HEIGHT)
-		BMPFAIL("Invalid image size");
 	if (h->nplanes != 1)
 		BMPFAIL("nplanes not 1");
 	if (h->bpp != 24)

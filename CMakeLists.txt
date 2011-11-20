@@ -27,6 +27,7 @@ if ( HG_TAG STREQUAL tip OR NOT HG_TAGLEN )
     execute_process( COMMAND hg id -i
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      OUTPUT_VARIABLE HG_TAG OUTPUT_STRIP_TRAILING_WHITESPACE )
+    set( HG_TAG "hg ${HG_TAG}" )
 endif()
 message( STATUS "Version: ${HG_TAG}" )
 

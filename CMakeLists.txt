@@ -50,5 +50,6 @@ if (NOT HAVE_UNISTD_H)
 endif ()
 
 add_executable (g3a-icodump icodump.c icon.c util.c)
+add_executable (convert565 convert565.c icon.c util.c)
 
 install (TARGETS mkg3a g3a-icodump DESTINATION bin)

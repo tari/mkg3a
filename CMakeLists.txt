@@ -14,6 +14,10 @@ if (USE_PNG)
     message (STATUS "libpng icon loading support enabled.")
     find_package (PNG REQUIRED)
     include_directories (${PNG_INCLUDE_DIR})
+    set (USE_PNG "1")
+else ()
+    # Lazy kludge for config.h.in
+    set (USE_PNG "0")
 endif ()
 
 execute_process( COMMAND hg id -t

@@ -18,14 +18,12 @@ static char *bmperror;
 #if USE_PNG
 u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
                        int32_t *width, int32_t *height) {
-    png_bytep *row_pointers;
     int32_t bit_depth, color_type;
 
+    png_read_png(png_ptr, info_ptr, 0, NULL);
     *width = png_get_image_width(png_ptr, info_ptr);
     *height = png_get_image_height(png_ptr, info_ptr);
 
-    png_read_png(png_ptr, info_ptr, 0, NULL);
-    row_pointers = png_get_rows(png_ptr, info_ptr);
     bit_depth = png_get_bit_depth(png_ptr, info_ptr);
     color_type = png_get_color_type(png_ptr, info_ptr);
 
@@ -34,9 +32,12 @@ u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
         return NULL;
     }
 
-    png_read_image(png_ptr, row_pointers);
     u8 *imageData = mallocs(3 * *width * *height);
+    png_bytep *row_pointers = mallocs(*height * sizeof(png_bytep));
     int y;
+    for (y = 0; y < *height; y++)
+        row_pointers[y] = imageData + (3 * *width * *height);
+    png_read_image(png_ptr, row_pointers);
     for (y = 0; y < *height; y++) {
         memcpy(imageData, row_pointers[y], *width * 3);
     }
@@ -48,7 +49,7 @@ u8 *loadBitmap_PNG(FILE *fp, int32_t *width, int32_t *height) {
 
     // Allocate basic libpng structures
     png_structp png_ptr = png_create_read_struct(
-        NULL, (png_voidp)NULL, NULL, NULL);
+        PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
     if (!png_ptr) {
         fprintf(stderr, "Failed to allocate memory for image data.");
         return NULL;
@@ -265,7 +266,7 @@ u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
     // Is this a PNG file?
     u8 header[8];
     fread(header, 1, 8, fp);
-    if (png_sig_cmp(header, 0, 8)) {
+    if (0 == png_sig_cmp(header, 0, 8)) {
         // Yes, load it up
         rewind(fp);
         imgData = loadBitmap_PNG(fp, width, height);
@@ -276,6 +277,8 @@ u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
         imgData = loadBitmap_BMP(fp, width, height);
     }
     fclose(fp);
+    if (!imgData)
+        return NULL;
     return convertBPP(imgData);
 }
 

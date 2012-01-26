@@ -19,6 +19,9 @@ static char *bmperror;
 u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
                        int32_t *width, int32_t *height) {
     int32_t bit_depth, color_type;
+	u8 *imageData = NULL;
+	png_bytep *row_pointers = NULL;
+	int y;
 
     png_read_png(png_ptr, info_ptr, 0, NULL);
     *width = png_get_image_width(png_ptr, info_ptr);
@@ -32,9 +35,8 @@ u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
         return NULL;
     }
 
-    u8 *imageData = mallocs(3 * *width * *height);
-    png_bytep *row_pointers = mallocs(*height * sizeof(png_bytep));
-    int y;
+    imageData = mallocs(3 * *width * *height);
+    row_pointers = mallocs(*height * sizeof(png_bytep));
     for (y = 0; y < *height; y++)
         row_pointers[y] = imageData + (3 * *width * *height);
     png_read_image(png_ptr, row_pointers);
@@ -46,6 +48,7 @@ u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
 
 u8 *loadBitmap_PNG(FILE *fp, int32_t *width, int32_t *height) {
     u8 *imageData = NULL;
+	png_infop info_ptr = NULL;
 
     // Allocate basic libpng structures
     png_structp png_ptr = png_create_read_struct(
@@ -54,7 +57,7 @@ u8 *loadBitmap_PNG(FILE *fp, int32_t *width, int32_t *height) {
         fprintf(stderr, "Failed to allocate memory for image data.");
         return NULL;
     }
-    png_infop info_ptr = png_create_info_struct(png_ptr);
+    info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) {
         fprintf(stderr, "Failed to allocate memory for image info struct.");
         goto cleanup_png_ptr;
@@ -256,6 +259,7 @@ void writeBitmap(const char *path, u16 *data, int w, int h) {
 
 u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
     u8 *imgData = NULL;
+	u8 pngHeader[8];
 	FILE *fp = fopen(path, "rb");
 	if (fp == NULL) {
 		printf("Unable to open image file: %s\n", strerror(errno));
@@ -264,18 +268,20 @@ u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
 
 #if USE_PNG
     // Is this a PNG file?
-    u8 header[8];
-    fread(header, 1, 8, fp);
-    if (0 == png_sig_cmp(header, 0, 8)) {
+    fread(pngHeader, 1, 8, fp);
+	rewind(fp);
+    if (0 == png_sig_cmp(pngHeader, 0, 8)) {
         // Yes, load it up
-        rewind(fp);
         imgData = loadBitmap_PNG(fp, width, height);
-    }
+    } else {
+#endif /* USE_PNG */
+		if (!imgData) {
+			imgData = loadBitmap_BMP(fp, width, height);
+		}
+#if USE_PNG
+	}
 #endif /* USE_PNG */
 
-    if (!imgData) {
-        imgData = loadBitmap_BMP(fp, width, height);
-    }
     fclose(fp);
     if (!imgData)
         return NULL;

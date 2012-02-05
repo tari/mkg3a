@@ -23,26 +23,27 @@ u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
 	png_bytep *row_pointers = NULL;
 	int y;
 
-    png_read_png(png_ptr, info_ptr, 0, NULL);
+	png_read_info(png_ptr, info_ptr);
     *width = png_get_image_width(png_ptr, info_ptr);
     *height = png_get_image_height(png_ptr, info_ptr);
-
     bit_depth = png_get_bit_depth(png_ptr, info_ptr);
     color_type = png_get_color_type(png_ptr, info_ptr);
-
     if (bit_depth != 8 || color_type != PNG_COLOR_TYPE_RGB) {
         fprintf(stderr, "Unsupported PNG bit depth or color type, must be RGB-8\n");
         return NULL;
     }
 
+	// Let libpng deinterlace for us
+	png_set_interlace_handling(png_ptr);
+	png_read_update_info(png_ptr, info_ptr);
+
+	// Read the file now
     imageData = mallocs(3 * *width * *height);
-    row_pointers = mallocs(*height * sizeof(png_bytep));
-    for (y = 0; y < *height; y++)
-        row_pointers[y] = imageData + (3 * *width * *height);
+	row_pointers = (png_bytep*)mallocs(sizeof(png_bytep) * *height);
+	for (y = 0; y < *height; y++)
+		row_pointers[y] = imageData + (*width * y);
     png_read_image(png_ptr, row_pointers);
-    for (y = 0; y < *height; y++) {
-        memcpy(imageData, row_pointers[y], *width * 3);
-    }
+
     return imageData;
 }
 

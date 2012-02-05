@@ -1,6 +1,12 @@
 cmake_minimum_required (VERSION 2.6)
 project (mkg3a)
-add_definitions(-Wall -Wextra)
+add_definitions(-Wall)
+if (MSVC)
+    # Always static linking on windows
+    add_definitions(/MT)
+else ()
+    add_definitions(-Wextra)
+endif ()
 
 ## Feature checks
 include (TestBigEndian)
@@ -41,11 +47,10 @@ configure_file (
 )
 include_directories ("${PROJECT_BINARY_DIR}")
 
-add_definitions (-Wall)
 add_library (icon STATIC icon.c)
 if (USE_PNG)
     include_directories (${PNG_INCLUDE_DIRS})
-    target_link_libraries (icon ${PNG_LIBRARY})
+    target_link_libraries (icon ${PNG_LIBRARY} ${ZLIB_LIBRARY})
 endif ()
 
 add_executable (mkg3a main.c g3a.c util.c)
@@ -57,7 +62,8 @@ if (NOT HAVE_UNISTD_H)
     target_link_libraries (mkg3a getopt)
 endif ()
 
-#add_executable (g3a-icodump icodump.c icon.c util.c)
+add_executable (g3a-icodump icodump.c icon.c util.c)
+target_link_libraries (g3a-icodump icon)
 #add_executable (convert565 convert565.c icon.c util.c)
 
 install (TARGETS mkg3a DESTINATION bin)

@@ -17,15 +17,16 @@ static char *bmperror;
 
 #if USE_PNG
 u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
-                       int32_t *width, int32_t *height) {
+                       int32_t *width_out, int32_t *height_out) {
     int32_t bit_depth, color_type;
-	u8 *imageData = NULL;
+	unsigned char *imageData = NULL;
 	png_bytep *row_pointers = NULL;
 	int y;
+	size_t w, h;
 
 	png_read_info(png_ptr, info_ptr);
-    *width = png_get_image_width(png_ptr, info_ptr);
-    *height = png_get_image_height(png_ptr, info_ptr);
+    *width_out = w = png_get_image_width(png_ptr, info_ptr);
+    *height_out = h = png_get_image_height(png_ptr, info_ptr);
     bit_depth = png_get_bit_depth(png_ptr, info_ptr);
     color_type = png_get_color_type(png_ptr, info_ptr);
     if (bit_depth != 8 || color_type != PNG_COLOR_TYPE_RGB) {
@@ -38,10 +39,12 @@ u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
 	png_read_update_info(png_ptr, info_ptr);
 
 	// Read the file now
-    imageData = mallocs(3 * *width * *height);
-	row_pointers = (png_bytep*)mallocs(sizeof(png_bytep) * *height);
-	for (y = 0; y < *height; y++)
-		row_pointers[y] = imageData + (*width * y);
+    imageData = mallocs((w * 3) * h);
+	row_pointers = mallocs(sizeof(png_bytep) * h);
+	for (y = 0; y < h; y++)
+	{
+		row_pointers[y] = imageData + (w * 3 * y);
+	}
     png_read_image(png_ptr, row_pointers);
 
     return imageData;
@@ -50,6 +53,7 @@ u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
 u8 *loadBitmap_PNG(FILE *fp, int32_t *width, int32_t *height) {
     u8 *imageData = NULL;
 	png_infop info_ptr = NULL;
+	int px;
 
     // Allocate basic libpng structures
     png_structp png_ptr = png_create_read_struct(
@@ -70,6 +74,14 @@ u8 *loadBitmap_PNG(FILE *fp, int32_t *width, int32_t *height) {
 
     png_init_io(png_ptr, fp);
     imageData = readImageData_PNG(png_ptr, info_ptr, width, height);
+
+	// Convert RGB pixel order to BGR expected by convertBPP later
+	for (px = 0; px < *width * *height * 3; px += 3)
+	{
+		u8 t = imageData[px];
+		imageData[px] = imageData[px+2];
+		imageData[px+2] = t;
+	}
 
 cleanup:
 cleanup_png_ptr:

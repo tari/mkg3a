@@ -18,7 +18,7 @@ typedef uint32_t u32;
 /* Is unistd.h available for getopt?  Otherwise use a replacement. */
 #cmakedefine HAVE_UNISTD_H
 
-/* Should we use magickcore, or our basic .bmp handler? */
-#define USE_MAGICKCORE @USE_MAGICKCORE@
+/* Enable libpng icon loader? */
+#define USE_PNG @USE_PNG@
 
 #endif /* _CONFIG_H */

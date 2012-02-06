@@ -7,25 +7,94 @@
 #include "icon.h"
 #include "util.h"
 
-static char *bmperror;
+#if USE_PNG
+#include <png.h>
+#endif
 
-#if USE_MAGICKCORE
-#error MagickCore support not implemented.
-#else
+static char *bmperror;
 
 #define BMPFAIL(s) { bmperror = s; return 1; }
 
-u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
+#if USE_PNG
+u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
+                       int32_t *width_out, int32_t *height_out) {
+    int32_t bit_depth, color_type;
+	unsigned char *imageData = NULL;
+	png_bytep *row_pointers = NULL;
+	int y;
+	size_t w, h;
+
+	png_read_info(png_ptr, info_ptr);
+    *width_out = w = png_get_image_width(png_ptr, info_ptr);
+    *height_out = h = png_get_image_height(png_ptr, info_ptr);
+    bit_depth = png_get_bit_depth(png_ptr, info_ptr);
+    color_type = png_get_color_type(png_ptr, info_ptr);
+    if (bit_depth != 8 || color_type != PNG_COLOR_TYPE_RGB) {
+        fprintf(stderr, "Unsupported PNG bit depth or color type, must be RGB-8\n");
+        return NULL;
+    }
+
+	// Let libpng deinterlace for us
+	png_set_interlace_handling(png_ptr);
+	png_read_update_info(png_ptr, info_ptr);
+
+	// Read the file now
+    imageData = mallocs((w * 3) * h);
+	row_pointers = mallocs(sizeof(png_bytep) * h);
+	for (y = 0; y < h; y++)
+	{
+		row_pointers[y] = imageData + (w * 3 * y);
+	}
+    png_read_image(png_ptr, row_pointers);
+
+    return imageData;
+}
+
+u8 *loadBitmap_PNG(FILE *fp, int32_t *width, int32_t *height) {
+    u8 *imageData = NULL;
+	png_infop info_ptr = NULL;
+	int px;
+
+    // Allocate basic libpng structures
+    png_structp png_ptr = png_create_read_struct(
+        PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
+    if (!png_ptr) {
+        fprintf(stderr, "Failed to allocate memory for image data.");
+        return NULL;
+    }
+    info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr) {
+        fprintf(stderr, "Failed to allocate memory for image info struct.");
+        goto cleanup_png_ptr;
+    }
+    if (setjmp(png_jmpbuf(png_ptr))) {
+        // Libpng error
+        goto cleanup;
+    }
+
+    png_init_io(png_ptr, fp);
+    imageData = readImageData_PNG(png_ptr, info_ptr, width, height);
+
+	// Convert RGB pixel order to BGR expected by convertBPP later
+	for (px = 0; px < *width * *height * 3; px += 3)
+	{
+		u8 t = imageData[px];
+		imageData[px] = imageData[px+2];
+		imageData[px+2] = t;
+	}
+
+cleanup:
+cleanup_png_ptr:
+    png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
+    return imageData;
+}
+#endif /* USE_PNG */
+
+u8 *loadBitmap_BMP(FILE *fp, int32_t *width, int32_t *height) {
 	struct bmp_header *bh;
 	struct dib_header *dh;
 	int err = 0;
 	u8 *data;
-
-	FILE *fp = fopen(path, "rb");
-	if (fp == NULL) {
-		printf("Unable to open image file: %s\n", strerror(errno));
-		return NULL;
-	}
 
 	bh = mallocs(sizeof(*bh));
 	dh = mallocs(sizeof(*dh));
@@ -46,12 +115,13 @@ u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
 		return NULL;
 	}
 
-	fclose(fp);
-	return convertBPP(data);
+	return data;
 }
 
+#if IS_BIG_ENDIAN
 /*
- * Inverts endianness of the given DIB header
+ * Inverts endianness of the given DIB header.
+ * Only used for big-endian systems.
  */
 static void dibHeader_convert(struct dib_header *h) {
 	h->header_size = u32_ntole(h->header_size);
@@ -66,6 +136,7 @@ static void dibHeader_convert(struct dib_header *h) {
 	//h->ncolors = u32_flip(h->ncolors);				// != 0 fails
 	//h->nimpcolors = u32_flip(h->nimpcolors);			// ignored
 }
+#endif /* IS_BIG_ENDIAN */
 
 int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp) {
 	size_t sz;
@@ -104,6 +175,7 @@ int readBMPData(u8 *d, FILE *fp) {
 	int row;
 	size_t sz;
 
+	// XXX hardcoded dimensions are begging to explode
 	for (row = ICON_HEIGHT - 1; row >= 0; row--) {
 		// Rows are 2208 bytes wide, so no alignment to worry about
 		// (rows are supposed to be aligned to 4 bytes)
@@ -198,4 +270,34 @@ void writeBitmap(const char *path, u16 *data, int w, int h) {
 	fclose(fp);
 }
 
-#endif /* USE_MAGICKCORE */
+u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
+    u8 *imgData = NULL;
+	u8 pngHeader[8];
+	FILE *fp = fopen(path, "rb");
+	if (fp == NULL) {
+		printf("Unable to open image file: %s\n", strerror(errno));
+		return NULL;
+	}
+
+#if USE_PNG
+    // Is this a PNG file?
+    fread(pngHeader, 1, 8, fp);
+	rewind(fp);
+    if (0 == png_sig_cmp(pngHeader, 0, 8)) {
+        // Yes, load it up
+        imgData = loadBitmap_PNG(fp, width, height);
+    } else {
+#endif /* USE_PNG */
+		if (!imgData) {
+			imgData = loadBitmap_BMP(fp, width, height);
+		}
+#if USE_PNG
+	}
+#endif /* USE_PNG */
+
+    fclose(fp);
+    if (!imgData)
+        return NULL;
+    return convertBPP(imgData);
+}
+

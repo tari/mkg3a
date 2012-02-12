@@ -2,7 +2,17 @@
 #define _G3A_H
 
 #include "config.h"
-#include "icon.h"
+
+#define G3A_ICON_HEIGHT (64)
+#define G3A_ICON_WIDTH (92)
+#define G3A_ICON_MONO_HEIGHT (24)
+#define G3A_ICON_MONO_WIDTH (64)
+
+struct icons {
+    u16 unselected[G3A_ICON_HEIGHT * G3A_ICON_WIDTH];
+    u16 selected[G3A_ICON_HEIGHT * G3A_ICON_WIDTH];
+    u16 mono[G3A_ICON_HEIGHT * G3A_ICON_WIDTH];
+};
 
 /* Shortcuts to create localized name members */
 #define NAME(lc) char name_ ## lc[0x18]

@@ -9,10 +9,10 @@
 #include "getopt.h"
 #endif /* HAS_UNISTD_H */
 
-#include "icon.h"
+#include "images.h"
 #include "config.h"
 #include "g3a.h"
-
+    
 char *USAGE =
 	"Usage: mkg3a [OPTION] input-file [output-file]\n\n"
 	"  -i (uns|sel):file\n"
@@ -34,6 +34,7 @@ char *VERSION =
 	"is NO warranty; in no event will the authors be held liable for any\n"
 	"damages arising from the use of this software.\n"
 	"\nSee http://www.taricorp.net/projects/mkg3a/ for updates.";
+    
 /*
  * Sets the name in names corresponding to opt, where opt is of the form
  * code:value.
@@ -67,7 +68,7 @@ int storeNameSpec(char *k, char *v, void *dest) {
 }
 
 int storeIconSpec(char *k, char *v, void *dest) {
-	struct icons *icons = (struct icons *)dest;
+    struct icons *icons = (struct icons *)dest;
     int32_t width, height;
 	u16 *idat;
 	void *cd;
@@ -83,10 +84,10 @@ int storeIconSpec(char *k, char *v, void *dest) {
 	idat = loadBitmap(v, &width, &height);
 	if (idat == NULL)
 		return 1;
-    if (width != ICON_WIDTH || height != ICON_HEIGHT) {
+    if (width != G3A_ICON_WIDTH || height != G3A_ICON_HEIGHT) {
         fprintf(stderr, "Dimensions of %s are invalid,", v);
         fprintf(stderr, " icons must be %ix%i pixels.\n",
-                ICON_WIDTH, ICON_HEIGHT);
+                G3A_ICON_WIDTH, G3A_ICON_HEIGHT);
         return 1;
     }
 	memcpy(cd, idat, sizeof(icons->unselected));

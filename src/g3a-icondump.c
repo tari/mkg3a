@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "icon.h"
 #include "g3a.h"
 
 int main(int argc, char **argv) {
@@ -18,7 +17,7 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	fread(&h, sizeof(h), 1, fp);
-	writeBitmap("uns.bmp", h.icon_unsel, ICON_WIDTH, ICON_HEIGHT);
-	writeBitmap("sel.bmp", h.icon_sel, ICON_WIDTH, ICON_HEIGHT);
+	writeBitmap("uns.bmp", h.icon_unsel, G3A_ICON_WIDTH, G3A_ICON_HEIGHT);
+	writeBitmap("sel.bmp", h.icon_sel, G3A_ICON_WIDTH, G3A_ICON_HEIGHT);
 	return 0;
 }

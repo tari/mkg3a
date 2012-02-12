@@ -7,7 +7,7 @@
 #include <time.h>
 
 #include "g3a.h"
-#include "icon.h"
+#include "images.h"
 #include "util.h"
 
 /*

@@ -1,13 +1,6 @@
-#include <stdio.h>
+#ifndef _IMAGES_H
+#define _IMAGES_H
 #include "config.h"
-
-#ifndef _ICON_H
-#define _ICON_H
-
-#define ICON_HEIGHT 64
-#define ICON_WIDTH 92
-#define ICON_MONO_HEIGHT 24
-#define ICON_MONO_WIDTH 64
 
 #pragma pack(1)	/* Padding would be bad, since we oneshot from disk */
 struct bmp_header {
@@ -33,17 +26,11 @@ struct dib_header {
 };
 #pragma pack()
 
-struct icons {
-	u16 unselected[ICON_HEIGHT * ICON_WIDTH];
-	u16 selected[ICON_HEIGHT * ICON_WIDTH];
-	u16 mono[ICON_MONO_WIDTH * ICON_MONO_HEIGHT];
-};
-
 u16 *loadBitmap(const char *path, int32_t *width, int32_t *height);
-int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp);
-int readBMPData(u8 *d, FILE *fp);
+int readBMPHeader(struct bmp_header *bh, struct dib_header *dh, FILE *fp);
+int readBMPData(struct dib_header *bh, u8 *d, FILE *fp);
 u8 convertChannelDepth(u8 c, u8 cd, u8 dd);
-u16 *convertBPP(u8 *d);
+u16 *convertBPP(int32_t w, int32_t h, u8 *d);
 void writeBitmap(const char *path, u16 *data, int w, int h);
 
-#endif /* _ICON_H */
+#endif // _IMAGES_H

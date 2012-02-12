@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "config.h"
-#include "icon.h"
+#include "images.h"
 #include "util.h"
 
 #if USE_PNG
@@ -93,14 +93,15 @@ cleanup_png_ptr:
 u8 *loadBitmap_BMP(FILE *fp, int32_t *width, int32_t *height) {
 	struct bmp_header *bh;
 	struct dib_header *dh;
+	int32_t w, h;
 	int err = 0;
 	u8 *data;
 
 	bh = mallocs(sizeof(*bh));
 	dh = mallocs(sizeof(*dh));
 	err = readBMPHeader(bh, dh, fp);
-    *width = dh->width;
-    *height = dh->height;
+    *width = w = dh->width;
+    *height = h = dh->height;
 	free(bh);
 	free(dh);
 	if (err) {
@@ -108,8 +109,8 @@ u8 *loadBitmap_BMP(FILE *fp, int32_t *width, int32_t *height) {
 		return NULL;
 	}
 
-	data = mallocs(ICON_WIDTH * 3 * ICON_HEIGHT);
-	if (readBMPData(data, fp)) {
+	data = mallocs(w * 3 * h);
+	if (readBMPData(dh, data, fp)) {
 		printf("Error reading image: %s\n", bmperror);
 		free(data);
 		return NULL;
@@ -171,16 +172,16 @@ int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp) {
 	return 0;
 }
 
-int readBMPData(u8 *d, FILE *fp) {
+int readBMPData(struct dib_header *dh, u8 *d, FILE *fp) {
 	int row;
 	size_t sz;
 
 	// XXX hardcoded dimensions are begging to explode
-	for (row = ICON_HEIGHT - 1; row >= 0; row--) {
+	for (row = dh->height - 1; row >= 0; row--) {
 		// Rows are 2208 bytes wide, so no alignment to worry about
 		// (rows are supposed to be aligned to 4 bytes)
-		sz = fread(d + row * ICON_WIDTH * 3, 3, ICON_WIDTH, fp);
-		if (sz != ICON_WIDTH)
+		sz = fread(d + row * dh->width * 3, 3, dh->width, fp);
+		if (sz != dh->width)
 			BMPFAIL("Unexpected EOF");
 	}
 	return 0;
@@ -200,12 +201,12 @@ u8 convertChannelDepth(u8 c, u8 cd, u8 dd) {
  * In-place conversion of data from 24bpp to 5-6-5 16bpp.
  * Also shrinks the block at d to the right size.
  */
-u16 *convertBPP(u8 *d) {
+u16 *convertBPP(uint32_t w, uint32_t h, u8 *d) {
 	int pxi;
 	u16 px;
 	char r, g, b;
 
-	for (pxi = 0; pxi < ICON_HEIGHT * ICON_WIDTH; pxi++) {
+	for (pxi = 0; pxi < w * h; pxi++) {
 		b = convertChannelDepth(d[pxi * 3], 8, 5);
 		g = convertChannelDepth(d[pxi * 3 + 1], 8, 6);
 		r = convertChannelDepth(d[pxi * 3 + 2], 8, 5);
@@ -215,7 +216,7 @@ u16 *convertBPP(u8 *d) {
 		d[2 * pxi] = px >> 8;
 		d[2 * pxi + 1] = px & 0xFF;
 	}
-	return realloc(d, 2 * ICON_HEIGHT * ICON_WIDTH);
+	return realloc(d, 2 * w * h);
 }
 
 
@@ -298,6 +299,6 @@ u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
     fclose(fp);
     if (!imgData)
         return NULL;
-    return convertBPP(imgData);
+    return convertBPP(width, height, imgData);
 }
 

@@ -13,17 +13,17 @@
 #  decompresses to
 # [0] * 70
 
-def compress_lzf(data):
+def compress(data):
     backrefs = []
     in_idx = 0
     
     # Build backref list
     while in_idx < len(data):
-        print("Analyzing at index {0} of {1}".format(in_idx, len(data)))
+        #print("Analyzing at index {0} of {1}".format(in_idx, len(data)))
         br = findBackref(data, in_idx)
         if br is not None:
             length, distance = br
-            print("Backref of {0} bytes beginning at {1} - {2}".format(length, in_idx, distance))
+            #print("Backref of {0} bytes beginning at {1} - {2}".format(length, in_idx, distance))
             assert distance > 0        # Sanity check
             assert length <= 1 << 13
             in_idx += length
@@ -75,7 +75,8 @@ def findBackref(data, src_idx):
         l = 0
         try:
             #print("\tdata[{0}] ({1}) == data[{2}] ({3})".format(i+l, data[i+l], src_idx+l, data[src_idx]))
-            while data[i + l] == data[src_idx + l] and l < BACKREF_LIMIT:
+            # Consume up to 255 + 9 (L+9) bytes per backref
+            while data[i + l] == data[src_idx + l] and l < (255 + 9):
                 #print("\t\tHIT")
                 l += 1
         except IndexError:

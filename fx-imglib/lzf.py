@@ -14,24 +14,9 @@
 # [0] * 70
 
 def compress(data):
-    backrefs = []
-    in_idx = 0
-    
     # Build backref list
-    while in_idx < len(data):
-        #print("Analyzing at index {0} of {1}".format(in_idx, len(data)))
-        br = findBackref(data, in_idx)
-        if br is not None:
-            length, distance = br
-            #print("Backref of {0} bytes beginning at {1} - {2}".format(length, in_idx, distance))
-            assert distance > 0        # Sanity check
-            assert length <= 1 << 13
-            in_idx += length
-            backrefs.append(br)
-        else:
-            backrefs.append(data[in_idx])
-            in_idx += 1
-    print backrefs
+    backrefs = encodeBackrefs(data)
+    #print backrefs
         
     # Encode the output
     literals = 0    # Length of current literal string
@@ -59,34 +44,42 @@ def compress(data):
                 literals = 0
     return out
             
-def findBackref(data, src_idx):
-    """
-    Searches ``data`` beginning at ``src_idx`` for backreferences.
-    Returns a tuple (length, distance) of the best backreference to use, or
-    a literal value if there are no worthwhile backreferences.
-    """
-    BACKREF_LIMIT = 1 << 13
-    search_idx = max(0, src_idx - BACKREF_LIMIT)
-    
-    candidates = []
-    #print("\tfindBackref range {0} - {1}".format(search_idx, src_idx))
-    for i in range(search_idx, src_idx):
-        distance = src_idx - i
-        l = 0
+def encodeBackrefs(data):
+    BACKREF_LIMIT = 1 << 15
+
+    triples = {}
+    i = 0
+    out = []
+    while i < len(data):
+        # Try hash
         try:
-            #print("\tdata[{0}] ({1}) == data[{2}] ({3})".format(i+l, data[i+l], src_idx+l, data[src_idx]))
-            # Consume up to 255 + 9 (L+9) bytes per backref
-            while data[i + l] == data[src_idx + l] and l < (255 + 9):
-                #print("\t\tHIT")
-                l += 1
+            print("Try-hash i = {0}".format(i))
+            key = (data[i] << 16) | (data[i+1] << 8) | data[i+2]
+            if key in triples and i - triples[key] < BACKREF_LIMIT:
+                if i == 2132:
+                    import pdb; pdb.set_trace()
+                # Valid backref, find its length
+                begin = triples[key]
+                print("Found triple match index {0} -> {1}".format(begin, i))
+                l = 0
+                try:
+                    while l < 255 + 9 and data[begin + l] == data[i + l]:
+                        l += 1
+                except IndexError:
+                    pass    # Hit end of input, backref terminates
+                distance = i - begin
+                assert distance > 0 and l < BACKREF_LIMIT
+                print("Backref: {0} bytes -{1}".format(l, distance))
+                out.append((l, distance))
+            else:
+                # Backref too far back, just emit a literal
+                l = 1
+                out.append(data[i])
+            # Update triples, then advance input pointer for consumed backref
+            triples[key] = i
+            i += l - 1
         except IndexError:
-            pass    # Hit end of input
-        if l >= 3:
-            candidates.append((l, distance))
-            
-    best = (0, 1)
-    for l, d in candidates:
-        if l > best[0] or \
-          (l == best[0] and d < best[1]):   # Prefer shorter offsets
-            best = (l,d)
-    return best if best[0] > 0 else None
+            # Fewer than 3 bytes left, backref useless
+            out.append(data[i])
+        i += 1
+    return out

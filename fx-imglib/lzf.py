@@ -44,10 +44,28 @@ def compress(data):
                 literals = 0
     return out
             
+def commonLeader(data, i, j):
+    """Get the number of common leading elements beginning at data[i] and data[j]."""
+    l = 0
+    try:
+        while l < 255+9 and data[i+l] == data[j+l]]:
+            l += 1
+    except IndexError:
+        pass    # terminates
+    return l
+
 def encodeBackrefs(data):
+    """
+    Annotate ``data`` with backrefs.  Backreferences are emitted as tuples of
+    (length, distance), while literal bytes are passed through unmodified.
+    
+    This function has rather large memory requirements, around 12n (where n is
+    the number of bytes input).
+    """
     BACKREF_LIMIT = 1 << 15
 
-    triples = {}
+    # Maps a triple of bytes to indices it was found at
+    triples = defaultdict(list)
     i = 0
     out = []
     while i < len(data):
@@ -56,27 +74,26 @@ def encodeBackrefs(data):
             print("Try-hash i = {0}".format(i))
             key = (data[i] << 16) | (data[i+1] << 8) | data[i+2]
             if key in triples and i - triples[key] < BACKREF_LIMIT:
-                if i == 2132:
-                    import pdb; pdb.set_trace()
-                # Valid backref, find its length
-                begin = triples[key]
-                print("Found triple match index {0} -> {1}".format(begin, i))
-                l = 0
-                try:
-                    while l < 255 + 9 and data[begin + l] == data[i + l]:
-                        l += 1
-                except IndexError:
-                    pass    # Hit end of input, backref terminates
+                # Drop any elements too far back to reference
+                triples[key] = filter(lambda k: i - k > BACKREF_LIMIT, triples[key])
+                if len(triples[key]) == 0:
+                    raise IndexError()  # No backrefs possible
+                    
+                # Find longest match
+                cl = functools.partial(commonLeader, data, i)
+                matchlens = map(cl, triples[key])
+                length, begin = max(zip(matchlens, triples[key]), key=lambda x: x[0])
+
                 distance = i - begin
-                assert distance > 0 and l < BACKREF_LIMIT
-                print("Backref: {0} bytes -{1}".format(l, distance))
-                out.append((l, distance))
+                assert distance > 0 and length < BACKREF_LIMIT
+                print("Backref: {0} bytes -{1}".format(length, distance))
+                out.append((length, distance))
             else:
                 # Backref too far back, just emit a literal
                 l = 1
                 out.append(data[i])
             # Update triples, then advance input pointer for consumed backref
-            triples[key] = i
+            triples[key].append(i)
             i += l - 1
         except IndexError:
             # Fewer than 3 bytes left, backref useless

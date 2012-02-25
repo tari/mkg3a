@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
+from collections import defaultdict
+import functools
 
 # Three kinds of streams:
 #  000LLLLL                     Literal string of L+1 bytes
@@ -48,7 +50,7 @@ def commonLeader(data, i, j):
     """Get the number of common leading elements beginning at data[i] and data[j]."""
     l = 0
     try:
-        while l < 255+9 and data[i+l] == data[j+l]]:
+        while l < 255+9 and data[i+l] == data[j+l]:
             l += 1
     except IndexError:
         pass    # terminates
@@ -71,11 +73,13 @@ def encodeBackrefs(data):
     while i < len(data):
         # Try hash
         try:
-            print("Try-hash i = {0}".format(i))
             key = (data[i] << 16) | (data[i+1] << 8) | data[i+2]
-            if key in triples and i - triples[key] < BACKREF_LIMIT:
+            #print("Try-hash  idx {0}, t = {1}".format(i, key))
+            if key in triples:
+                #print("\t{0} matches".format(len(triples[key])))
                 # Drop any elements too far back to reference
-                triples[key] = filter(lambda k: i - k > BACKREF_LIMIT, triples[key])
+                triples[key] = filter(lambda k: i - k < BACKREF_LIMIT, triples[key])
+                #print("\treduced to {0} in-range".format(len(triples[key])))
                 if len(triples[key]) == 0:
                     raise IndexError()  # No backrefs possible
                     
@@ -90,11 +94,11 @@ def encodeBackrefs(data):
                 out.append((length, distance))
             else:
                 # Backref too far back, just emit a literal
-                l = 1
+                length = 1
                 out.append(data[i])
             # Update triples, then advance input pointer for consumed backref
             triples[key].append(i)
-            i += l - 1
+            i += length - 1
         except IndexError:
             # Fewer than 3 bytes left, backref useless
             out.append(data[i])

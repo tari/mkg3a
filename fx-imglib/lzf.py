@@ -65,15 +65,15 @@ def encodeBackrefs(data):
     the number of bytes input).
     """
     BACKREF_LIMIT = 1 << 15
+    hash = lambda d,i: (d[i] << 16) | (d[i+1] << 8) | d[i+2]
 
     # Maps a triple of bytes to indices it was found at
     triples = defaultdict(list)
     i = 0
     out = []
-    while i < len(data):
-        # Try hash
+    while i < len(data)-2:
         try:
-            key = (data[i] << 16) | (data[i+1] << 8) | data[i+2]
+            key = hash(data, i)
             #print("Try-hash  idx {0}, t = {1}".format(i, key))
             if key in triples:
                 #print("\t{0} matches".format(len(triples[key])))
@@ -83,24 +83,31 @@ def encodeBackrefs(data):
                 if len(triples[key]) == 0:
                     raise IndexError()  # No backrefs possible
                     
-                # Find longest match
+                # Find longest matches
                 cl = functools.partial(commonLeader, data, i)
                 matchlens = map(cl, triples[key])
-                length, begin = max(zip(matchlens, triples[key]), key=lambda x: x[0])
+                length, begin = (0, 0)
+                for l, b in zip(matchlens, triples[key]):
+                    if l > length or (l == length and b > begin):
+                        length, begin = l, b
+                #print("Best match len = {0} begins at {1}".format(length, begin))
 
                 distance = i - begin
                 assert distance > 0 and length < BACKREF_LIMIT
-                print("Backref: {0} bytes -{1}".format(length, distance))
+                #print("Backref: {0} bytes -{1}".format(length, distance))
                 out.append((length, distance))
             else:
                 # Backref too far back, just emit a literal
-                length = 1
-                out.append(data[i])
-            # Update triples, then advance input pointer for consumed backref
-            triples[key].append(i)
-            i += length - 1
+                raise IndexError()
         except IndexError:
-            # Fewer than 3 bytes left, backref useless
+            length = 1
             out.append(data[i])
-        i += 1
+        # Scan all consumed data for triples, advance input pointer
+        for j in xrange(i, min(i+length, len(data)-2)):
+            triples[hash(data, j)].append(j)
+        i += length
+        
+    # Last few bytes useless to backref
+    for j in xrange(i, len(data)):
+        out.append(data[j])
     return out

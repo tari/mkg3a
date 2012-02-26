@@ -26,10 +26,9 @@ def loadPlanes(file):
     return (r,g,b)
     
 if __name__ == "__main__":
-    import sys, operator, time, os
-    for f in sys.argv[1:]:
-        print("{0}: {1} bytes in, ".format(f, os.path.getsize(f)), end='')
-        start = time.time()
-        r, g, b = loadPlanes(f)
-        print("{0} bytes out in {1} seconds".format(
-            reduce(operator.add, map(len, (r, g, b))), time.time() - start))
+    import sys, operator, time
+    f = sys.argv[1]
+    start = time.time()
+    r, g, b = loadPlanes(f)
+    size = reduce(operator.add, map(len, (r,g,b)))
+    print("{0} bytes out in {1} seconds".format(size, time.time() - start))

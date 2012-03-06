@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # coding=utf-8
+from __future__ import print_function
 from collections import defaultdict
 import functools
+import multiprocessing
 
 # Three kinds of streams:
 #  000LLLLL                     Literal string of L+1 bytes
@@ -15,6 +17,40 @@ import functools
 #  decompresses to
 # [0] * 70
 
+# Optimization opportunities:
+#  * filter stage usually returns no change
+#  * rolling hash to find substrings?
+#  * backrefs are a question of longest common substring - suffix tree?
+#
+# The parallel map heuristic is weak (and currently data-specific), it can
+# be improved for other cases.  65% is good for obliterate.png.
+def decompress(data):
+    out = bytearray()
+    i = 0
+    while i < len(data):
+        head = data[i]
+        i += 1
+        if (head & 0xE0) == 0:          # Literal
+            l = 1 + (head & 0x1F)
+            back = i
+            i += l
+        else:
+            back = i - 1
+            if (head & 0xE0) == 0xE0:   # Short backref
+                l = (head >> 5) + 3
+            else:                       # Long backref
+                l = data[i] + 9
+                i += 1
+            a = head & 0x1F
+            b = data[i]
+            i += 1
+            back -= (a << 8) | b
+        while l > 0:
+            out.append(data[back])
+            back += 1
+            l -= 1
+    return out
+            
 def compress(data):
     # Build backref list
     backrefs = encodeBackrefs(data)
@@ -71,6 +107,8 @@ def encodeBackrefs(data):
     triples = defaultdict(list)
     i = 0
     out = []
+    p = multiprocessing.Pool()
+    fmap = lambda i, f: map(i, f)
     while i < len(data)-2:
         try:
             key = hash(data, i)
@@ -85,7 +123,7 @@ def encodeBackrefs(data):
                     
                 # Find longest matches
                 cl = functools.partial(commonLeader, data, i)
-                matchlens = map(cl, triples[key])
+                matchlens = fmap(cl, triples[key])
                 length, begin = (0, 0)
                 for l, b in zip(matchlens, triples[key]):
                     if l > length or (l == length and b > begin):
@@ -106,7 +144,12 @@ def encodeBackrefs(data):
         for j in xrange(i, min(i+length, len(data)-2)):
             triples[hash(data, j)].append(j)
         i += length
-        
+
+        if fmap != p.map and float(i) / len(data) > 0.65:
+            fmap = p.map
+        print("{0: 04.2f}%".format(float(i)*100 / len(data)), end='\r')
+    p.close()
+    
     # Last few bytes useless to backref
     for j in xrange(i, len(data)):
         out.append(data[j])

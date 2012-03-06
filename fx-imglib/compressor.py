@@ -14,7 +14,7 @@ def loadPlanes(file):
         return
         
     width, height = im.size
-    r, g, b = ([], [], [])
+    r, g, b = (bytearray(),) * 3
     for px in pixels:
         rpx, gpx, bpx = unpack(*px)
         r.append(rpx)
@@ -22,13 +22,13 @@ def loadPlanes(file):
         b.append(bpx)
 
     print("Loaded 3 channels RGB: {0} bytes".format(len(r) + len(g) + len(b)))
-    r, g, b = map(lzf.compress, (r,g,b))
     return (r,g,b)
     
 if __name__ == "__main__":
     import sys, operator, time
     f = sys.argv[1]
-    start = time.time()
     r, g, b = loadPlanes(f)
-    size = reduce(operator.add, map(len, (r,g,b)))
+    start = time.time()
+    rc, gc, bc = map(lzf.compress, (r,g,b))
+    size = reduce(operator.add, map(len, (rc,gc,bc)))
     print("{0} bytes out in {1} seconds".format(size, time.time() - start))

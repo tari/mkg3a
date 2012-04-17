@@ -74,6 +74,8 @@ u8 *loadBitmap_PNG(FILE *fp, int32_t *width, int32_t *height) {
 
     png_init_io(png_ptr, fp);
     imageData = readImageData_PNG(png_ptr, info_ptr, width, height);
+	if (imageData == NULL)
+		goto cleanup;
 
 	// Convert RGB pixel order to BGR expected by convertBPP later
 	for (px = 0; px < *width * *height * 3; px += 3)

@@ -14,7 +14,7 @@
 #include "g3a.h"
     
 char *USAGE =
-	"Usage: mkg3a [OPTION] input-file [output-file]\n\n"
+	"\nUsage: mkg3a [OPTION] input-file [output-file]\n\n"
 	"  -i (uns|sel):file\n"
 	"		Load unselected/selected icon from file\n"
 	"  -n lc:name\n"
@@ -126,7 +126,7 @@ int splitAndStore(char *opt, int (*handler)(char *, char *, void *),
 		// Handler expected to free v if necessary when successful
 		failure = handler(k, v, dest);
 		if (failure) {
-			printf("Invalid key: %s\n", k);
+			printf("Failed to parse option: `%s:%s`.  See previous error.\n", k, v);
 			free(v);
 			return 1;
 		}

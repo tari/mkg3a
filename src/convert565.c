@@ -2,11 +2,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "config.h"
+#include "images.h"
 
 static void usage();
 
 int main(int argc, char **argv) {
-	size_t data_sz;
 	int32_t width = 0, height = 0;
 	u16 *data;
 	FILE *fp = NULL;

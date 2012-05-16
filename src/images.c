@@ -21,7 +21,7 @@ u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
     int32_t bit_depth, color_type;
 	unsigned char *imageData = NULL;
 	png_bytep *row_pointers = NULL;
-	int y;
+	unsigned int y;
 	size_t w, h;
 
 	png_read_info(png_ptr, info_ptr);
@@ -183,7 +183,7 @@ int readBMPData(struct dib_header *dh, u8 *d, FILE *fp) {
 		// Rows are 2208 bytes wide, so no alignment to worry about
 		// (rows are supposed to be aligned to 4 bytes)
 		sz = fread(d + row * dh->width * 3, 3, dh->width, fp);
-		if (sz != dh->width)
+		if (sz != (unsigned)dh->width)
 			BMPFAIL("Unexpected EOF");
 	}
 	return 0;
@@ -203,7 +203,7 @@ u8 convertChannelDepth(u8 c, u8 cd, u8 dd) {
  * In-place conversion of data from 24bpp to 5-6-5 16bpp.
  * Also shrinks the block at d to the right size.
  */
-u16 *convertBPP(uint32_t w, uint32_t h, u8 *d) {
+u16 *convertBPP(int32_t w, int32_t h, u8 *d) {
 	int pxi;
 	u16 px;
 	char r, g, b;
@@ -301,6 +301,6 @@ u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
     fclose(fp);
     if (!imgData)
         return NULL;
-    return convertBPP(width, height, imgData);
+    return convertBPP(*width, *height, imgData);
 }
 

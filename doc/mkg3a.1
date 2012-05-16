@@ -1,0 +1,96 @@
+.TH "MKG3A" "1" "May 2012"
+
+.SH NAME
+mkg3a \- a program packer for Casio FX-CG calculators
+
+.SH SYNOPSIS
+
+\fBmkg3a\fR
+[[\-n \fIlang\fR:\fIname\fR]...]
+[[\-i (\fIuns\fR|\fIsel\fR):\fIfile\fR]...]
+\fIinfile.bin\fR [\fIoutfile.g3a\fR]
+
+.SH DESCRIPTION
+.B mkg3a
+wraps an input file into a g3a file suitable for loading and running on a
+Casio FX-CG calculator.
+
+.SH OPTIONS
+
+.TP
+\fB\-n \fIlang\fB:\fIname\fR
+Set the localized name of the resultant g3a to \fIname\fR.  See the
+\fBLOCALIZATION\fR section for details on values of \fIlang\fR.
+
+.TP
+\fB\-i (\fIuns\fB|\fIsel\fB):\fIicon.png\fR
+Embed \fIicon.png\fR as the icon to show when the add-in is shown but not
+selected (\fIuns\fBelected), or when \fIsel\fRected on the calculator.
+Acceptable image formats are \fBBMP\fR, or \fBPNG\fR if your \fBmkg3a\fR
+was built with libpng support. Icons must be 92 by 64 pixels.
+
+.TP
+\fB\-v\fR
+Show version and license information then exit.
+
+.TP
+\fB\-h\fR
+Show usage information then exit.
+
+.SH LOCALIZATION
+Every g3a file contains fields for a number of localized addin names.
+\fBmkg3a\fR supports setting these individually, via the \fB-n\fR option,
+with the following legal values for \fIlang\fR.
+.TP
+\fBen\fR
+English
+.TP
+\fBes\fR
+Spanish
+.TP
+\fBde\fR
+German
+.TP
+\fBfr\fR
+French
+.TP
+\fBpt\fR
+Portugese
+.TP
+\fBzh\fR
+Chinese
+.TP
+\fBbasic\fR
+Default (unlocalized) name.
+.TP
+\fBinternal\fR
+A field that appears to be used internally by the calculator. This should
+not usually be set explicitly, and will default to a reasonable value.
+
+.PP
+When shown in calculator menus, the localized name will be displayed as
+appropriate according to the user's language settings.
+If \fIlang\fR is empty, it is assumed to be \fIbasic\fR
+(see \fBEXAMPLE\fR for a demonstration). 
+
+Any unspecified localized names will be automatically be filled from the
+value of \fIbasic\fR.  If \fIbasic\fR is not specified, it defaults to
+the name of the output file.
+
+.SH EXAMPLE
+The following invocation packs the file example.bin into example.g3a, with
+basic name "James".  The localized name in French is "Jacques", and
+the icons are read from files foo.png and bar.bmp.
+
+mkg3a \-n :James \-n fr:Jacques \-i uns:foo.png \-i sel:bar.bmp example.bin
+
+.SH SEE ALSO
+gcc(1), ld(1)
+
+FX-CG software development is documented extensively on WikiPrizm, at
+\fIhttp://prizm.cemetech.net/\fR.  The homepage for \fBmkg3a\fR is
+\fIhttp://www.taricorp.net/projects/mkg3a\rR.
+
+.SH AUTHOR
+\fBmkg3a\fR and this manual page were written by Peter Marheine
+<peter@taricorp.net>.

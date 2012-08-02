@@ -120,7 +120,6 @@ int splitAndStore(char *opt, int (*handler)(char *, char *, void *),
 	int failure;
 
 	if (splitKV(opt, &k, &v)) {
-		printf("Missing colon: %s\n", opt);
 		return 1;
 	} else {
 		// Handler expected to free v if necessary when successful
@@ -128,7 +127,7 @@ int splitAndStore(char *opt, int (*handler)(char *, char *, void *),
 		if (failure) {
 			printf("Failed to parse option: `%s:%s`.  See previous error.\n", k, v);
 			free(v);
-			return 1;
+			return 2;
 		}
 	}
 	return 0;
@@ -150,8 +149,12 @@ int main(int argc, char **argv) {
 			puts(VERSION);
 			return 0;
 		case 'n':
-			if (splitAndStore(optarg, &storeNameSpec, &names))
+			if (splitAndStore(optarg, &storeNameSpec, &names) == 1) {
+				// Implicit basic specification
+				storeNameSpec("", optarg, &names);
+			} else {
 				errors++;
+			}
 			break;
 		case 'i':
 			if (splitAndStore(optarg, &storeIconSpec, &icons))

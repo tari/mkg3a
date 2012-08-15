@@ -136,6 +136,7 @@ int splitAndStore(char *opt, int (*handler)(char *, char *, void *),
 int main(int argc, char **argv) {
 	int c, errors = 0;
 	int args = 0;
+	int status = 0;
 	char *inFN, *outFN;
 	struct lc_names names = {{{NULL}}};
 	struct icons icons = {{0}, {0}, {0}};
@@ -149,10 +150,12 @@ int main(int argc, char **argv) {
 			puts(VERSION);
 			return 0;
 		case 'n':
-			if (splitAndStore(optarg, &storeNameSpec, &names) == 1) {
+			status = splitAndStore(optarg, &storeNameSpec, &names);
+			// 0 is straight up success (no additional processing)
+			if (status == 1) {
 				// Implicit basic specification
 				storeNameSpec("", optarg, &names);
-			} else {
+			} else if (status) {
 				errors++;
 			}
 			break;

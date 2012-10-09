@@ -42,16 +42,32 @@ endif ()
 
 
 ## Build configuration
-execute_process( COMMAND hg id -t
-                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                 OUTPUT_VARIABLE HG_TAG OUTPUT_STRIP_TRAILING_WHITESPACE )
-string( LENGTH "${HG_TAG}" HG_TAGLEN )
-if ( HG_TAG STREQUAL tip OR NOT HG_TAGLEN )
-    execute_process( COMMAND hg id -i
+if (EXISTS "${PROJECT_SOURCE_DIR}/.hg/")
+    # We're in a repo
+    execute_process( COMMAND hg id -t
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      OUTPUT_VARIABLE HG_TAG OUTPUT_STRIP_TRAILING_WHITESPACE )
-    set( HG_TAG "hg ${HG_TAG}" )
+    execute_process( COMMAND hg id -i
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                     OUTPUT_VARIABLE HG_NODE OUTPUT_STRIP_TRAILING_WHITESPACE )
+ elseif (EXISTS "${PROJECT_SOURCE_DIR}/.hg_archival.txt")
+    # Auto-archived tag snapshot of repository
+    file(STRINGS ../.hg_archival.txt HG_TAG
+         REGEX "tag: ")
+    string(SUBSTRING "${HG_TAG}" 5 -1 HG_TAG)
+    file(STRINGS ../.hg_archival.txt HG_NODE
+         REGEX "node: ")
+    string(SUBSTRING "${HG_NODE}" 5 -1 HG_NODE)
+else ()
+    # No idea
+    set (HG_TAG "<unknown version>")
 endif()
+
+# If not tagged or this revision is tip, use the node ID instead of tag
+string( LENGTH "${HG_TAG}" HG_TAGLEN )
+if ( HG_TAG STREQUAL tip OR NOT HG_TAGLEN )
+    set( HG_TAG "hg ${HG_NODE}" )
+endif ()
 message( STATUS "Version: ${HG_TAG}" )
 
 set (mkg3a_VERSION_TAG ${HG_TAG})

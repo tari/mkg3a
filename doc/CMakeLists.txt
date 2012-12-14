@@ -4,7 +4,7 @@ set(INSTALL_MANDIR "/share/man/"
 set(MAN_SOURCE "${PROJECT_SOURCE_DIR}/doc/mkg3a.1")
 add_custom_command(
     OUTPUT mkg3a.1.gz
-    COMMAND gzip ${MAN_SOURCE} -c > mkg3a.1.gz
+    COMMAND gzip --best ${MAN_SOURCE} -c > mkg3a.1.gz
     DEPENDS ${MAN_SOURCE}
 )
 add_custom_target(doc ALL DEPENDS mkg3a.1.gz)

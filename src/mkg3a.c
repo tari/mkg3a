@@ -19,6 +19,8 @@ char *USAGE =
     "     Load unselected/selected icon from file\n"
     "  -n lc:name\n"
     "     Set localized name for language code\n"
+    "  -V ver\n"
+    "     Set version string\n"
     "  -v\n"
     "     Show version and license information then exit\n"
     "\nValid values for lc are basic, internal, en, es, de, fr, pt and zh.\n"
@@ -140,8 +142,9 @@ int main(int argc, char **argv) {
     char *inFN, *outFN;
     struct lc_names names = {{{NULL}}};
     struct icons icons = {{0}, {0}, {0}};
+    char *version = "01.00.0000";
 
-    while ((c = getopt(argc, argv, ":n:i:hv")) != -1) {
+    while ((c = getopt(argc, argv, ":n:i:V:hv")) != -1) {
         switch(c) {
         case 'h':
             errors++;   // Force help
@@ -162,6 +165,9 @@ int main(int argc, char **argv) {
         case 'i':
             if (splitAndStore(optarg, &storeIconSpec, &icons))
                 errors++;
+            break;
+        case 'V':
+            version = optarg;
             break;
         case ':':
             printf("Option -%c requires operand", optopt);
@@ -201,7 +207,7 @@ int main(int argc, char **argv) {
 
     if (names.basic == NULL)
         names.basic = strdup(outFN);
-    if (g3a_mkG3A(inFN, outFN, &names, &icons)) {
+    if (g3a_mkG3A(inFN, outFN, &names, &icons, version)) {
         printf("Operation failed.  Output file is probably broken.\n");
         return 2;
     }

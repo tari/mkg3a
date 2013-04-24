@@ -19,7 +19,8 @@
  * Returns 0 on success, nonzero otherwise.
  */
 int g3a_mkG3A(const char *inFile, const char *outFile,
-              struct lc_names *names, struct icons *icons) {
+              struct lc_names *names, struct icons *icons,
+              const char *version) {
     u32 inSize, cksum;
     struct g3a_header *header;
     const char *baseName;
@@ -40,6 +41,7 @@ int g3a_mkG3A(const char *inFile, const char *outFile,
     g3a_fillSize(header, inSize);
     g3a_fillCProt(header);
     g3a_fillIcons(header, icons);
+    g3a_fillVersion(header, version);
 
     baseName = basename(outFile);
     strncpy(header->filename, baseName, sizeof(header->filename) - 1);
@@ -146,6 +148,11 @@ void g3a_fillSize(struct g3a_header *h, u32 codeSize) {
     outSize = codeSize + 0x7004;
     dumpb_u32(outSize, &h->size);
 }
+
+void g3a_fillVersion(struct g3a_header *h, const char *version) {
+    strncpy(h->version, version, sizeof(h->version) - 1);
+}
+
 /*
  * Read inFile, checksum it, and write the contents into outFile.
  */

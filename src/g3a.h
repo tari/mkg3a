@@ -114,7 +114,8 @@ struct lc_names {
 
 /* Creating bits of the file */
 int g3a_mkG3A(const char *inFile, const char *outFile,
-              struct lc_names *names, struct icons *icons);
+              struct lc_names *names, struct icons *icons,
+              const char *version);
 struct g3a_header *g3a_mkHeader(int type);
 int g3a_processRaw(const char *inFile, FILE *outFile, u32 *size, u32 *cksum);
 
@@ -124,5 +125,6 @@ void g3a_fillIcons(struct g3a_header *h, struct icons *icons);
 void g3a_fillNames(struct g3a_header *h, struct lc_names *names);
 void g3a_fillSize(struct g3a_header *h, u32 codeSize);
 void g3a_fillTimestamp(struct g3a_header *h);
+void g3a_fillVersion(struct g3a_header *h, const char *version);
 
 #endif /* _G3A_H */

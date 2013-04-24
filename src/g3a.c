@@ -95,7 +95,7 @@ void g3a_fillNames(struct g3a_header *h, struct lc_names *names) {
     strncpy(h->name_internal, src, sizeof(h->name_internal) - 1);
     // All-caps + leading @
     memmove(h->name_internal + 1, h->name_internal,
-            sizeof(h->name_internal - 2));
+            sizeof(h->name_internal) - 2);
     h->name_internal[0] = '@';
     for (i = 0; i < sizeof(h->name_internal) - 1; i++) {
         h->name_internal[i] = toupper((int)h->name_internal[i]);

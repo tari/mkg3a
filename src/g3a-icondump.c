@@ -1,4 +1,6 @@
 #include <stdio.h>
+
+#include "images.h"
 #include "g3a.h"
 
 int main(int argc, char **argv) {

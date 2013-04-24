@@ -2,27 +2,27 @@
 #define _IMAGES_H
 #include "config.h"
 
-#pragma pack(1)	/* Padding would be bad, since we oneshot from disk */
+#pragma pack(1) /* Padding would be bad, since we oneshot from disk */
 struct bmp_header {
-	u8 signature[2];
-	u32 file_size;
-	u16 reserved1;
-	u16 reserved2;
-	u32 px_offset;
+    u8 signature[2];
+    u32 file_size;
+    u16 reserved1;
+    u16 reserved2;
+    u32 px_offset;
 };
 
 struct dib_header {
-	u32 header_size;
-	int32_t width;
-	int32_t height;
-	u16 nplanes;
-	u16 bpp;
-	u32 compress_type;
-	u32 bmp_byte_size;
-	int32_t hres;
-	int32_t vres;
-	u32 ncolors;
-	u32 nimpcolors;
+    u32 header_size;
+    int32_t width;
+    int32_t height;
+    u16 nplanes;
+    u16 bpp;
+    u32 compress_type;
+    u32 bmp_byte_size;
+    int32_t hres;
+    int32_t vres;
+    u32 ncolors;
+    u32 nimpcolors;
 };
 #pragma pack()
 

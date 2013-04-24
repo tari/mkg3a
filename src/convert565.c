@@ -7,9 +7,9 @@
 static void usage();
 
 int main(int argc, char **argv) {
-	int32_t width = 0, height = 0;
-	u16 *data;
-	FILE *fp = NULL;
+    int32_t width = 0, height = 0;
+    u16 *data;
+    FILE *fp = NULL;
 
     if (argc < 3) {
         usage();

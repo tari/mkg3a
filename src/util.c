@@ -14,11 +14,11 @@ static __inline u16 u16_flip(u16 v);
  */
 const char *basename(const char *path)
 {
-	const char *n = strrchr(path, '/');
+    const char *n = strrchr(path, '/');
     if (n == NULL)
         return path;
     else if (strlen(n) == 0)
-    		return NULL;
+            return NULL;
     return n;
 }
 
@@ -49,14 +49,14 @@ u32 u32_ntobe(u32 v) {
 #if !IS_BIG_ENDIAN
     return u32_flip(v);
 #else
-	return v;
+    return v;
 #endif
 }
 u16 u16_ntobe(u16 v) {
 #if !IS_BIG_ENDIAN
     return u16_flip(v);
 #else
-	return v;
+    return v;
 #endif
 }
 // Native byte order to little-endian
@@ -64,14 +64,14 @@ u32 u32_ntole(u32 v) {
 #if IS_BIG_ENDIAN
     return u32_flip(v);
 #else
-	return v;
+    return v;
 #endif
 }
 u16 u16_ntole(u16 v) {
 #if IS_BIG_ENDIAN
     return u16_flip(v);
 #else
-	return v;
+    return v;
 #endif
 }
 
@@ -90,18 +90,18 @@ void dumpb_u32(u32 v, u32 *loc) {
  * 'safe' wrappers for malloc and friends
  */
 void *mallocs(size_t size) {
-	void *r = malloc(size);
-	if (r == NULL) {
-		printf("Failed to allocate memory; aborting.\n");
-		exit(2);
-	}
-	return r;
+    void *r = malloc(size);
+    if (r == NULL) {
+        printf("Failed to allocate memory; aborting.\n");
+        exit(2);
+    }
+    return r;
 }
 void *callocs(size_t count, size_t size) {
-	void *r = calloc(count, size);
-	if (r == NULL) {
-		printf("Failed to allocate memory; aborting.\n");
-		exit(2);
-	}
-	return r;
+    void *r = calloc(count, size);
+    if (r == NULL) {
+        printf("Failed to allocate memory; aborting.\n");
+        exit(2);
+    }
+    return r;
 }

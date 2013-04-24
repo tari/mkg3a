@@ -44,17 +44,17 @@ struct g3a_header {
     char name_internal[0xB];
     /* 0x006B - 0x012F Localized names */
     union {
-    	char lc_names[8][0x18];
-    	struct {
-			NAME(en);
-			NAME(es);
-			NAME(de);
-			NAME(fr);
-			NAME(pt);
-			NAME(zh);
-			NAME(un1);      // Unknown (english?)
-			NAME(un2);      // Unknown (english?)
-    	};
+        char lc_names[8][0x18];
+        struct {
+            NAME(en);
+            NAME(es);
+            NAME(de);
+            NAME(fr);
+            NAME(pt);
+            NAME(zh);
+            NAME(un1);      // Unknown (english?)
+            NAME(un2);      // Unknown (english?)
+        };
     };
     u8 _pad5[5];
     /* 0x130 Version string */
@@ -64,17 +64,17 @@ struct g3a_header {
     u8 _pad6[37];
     /* 0x0170 - 0x028F More localized names */
     union {
-    	char lc_lnames[8][0x24];
-    	struct {
-			LNAME(en);
-			LNAME(es);
-			LNAME(de);
-			LNAME(fr);
-			LNAME(pt);
-			LNAME(zh);
-			LNAME(un1);      // Unknown (english?)
-			LNAME(un2);      // Unknown (english?)
-    	};
+        char lc_lnames[8][0x24];
+        struct {
+            LNAME(en);
+            LNAME(es);
+            LNAME(de);
+            LNAME(fr);
+            LNAME(pt);
+            LNAME(zh);
+            LNAME(un1);      // Unknown (english?)
+            LNAME(un2);      // Unknown (english?)
+        };
     };
     /* 0x0290 Monochrome icon- 64x24, 1 nibble per pixel, 0 or 7 */
     u8 icon_mono[64 * 24 / 2];
@@ -92,29 +92,29 @@ struct g3a_header {
 #pragma pack()
 
 struct lc_names {
-	union {
-		char *raw[10];
-		struct {
-			char *basic;
-			char *internal;
-			union {
-				char *localized[8];
-				struct {
-					char *en;
-					char *es;
-					char *de;
-					char *fr;
-					char *pt;
-					char *zh;
-				};
-			};
-		};
-	};
+    union {
+        char *raw[10];
+        struct {
+            char *basic;
+            char *internal;
+            union {
+                char *localized[8];
+                struct {
+                    char *en;
+                    char *es;
+                    char *de;
+                    char *fr;
+                    char *pt;
+                    char *zh;
+                };
+            };
+        };
+    };
 };
 
 /* Creating bits of the file */
 int g3a_mkG3A(const char *inFile, const char *outFile,
-			  struct lc_names *names, struct icons *icons);
+              struct lc_names *names, struct icons *icons);
 struct g3a_header *g3a_mkHeader(int type);
 int g3a_processRaw(const char *inFile, FILE *outFile, u32 *size, u32 *cksum);
 

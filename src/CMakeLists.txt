@@ -72,8 +72,8 @@ message( STATUS "Version: ${HG_TAG}" )
 
 set (mkg3a_VERSION_TAG ${HG_TAG})
 configure_file (
-	config.h.in
-	config.h
+    config.h.in
+    config.h
 )
 include_directories ("${PROJECT_BINARY_DIR}/src")
 

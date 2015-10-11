@@ -44,7 +44,7 @@ char *VERSION =
  */
 int storeNameSpec(char *k, char *v, void *dest) {
     struct lc_names *names = (struct lc_names *)dest;
-    const char *codes[] = {"en", "es", "de", "fr", "pt", "zh"};
+    const char *codes[] = {"en", "es", "de", "fr", "pt", "zh", "un1", "un2"};
     unsigned int i;
 
     if (!strcmp(k, "basic") || strlen(k) == 0) {

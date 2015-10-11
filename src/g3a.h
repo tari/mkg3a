@@ -106,6 +106,8 @@ struct lc_names {
                     char *fr;
                     char *pt;
                     char *zh;
+                    char *un1;
+                    char *un2;
                 };
             };
         };

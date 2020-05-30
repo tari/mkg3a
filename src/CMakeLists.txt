@@ -42,35 +42,22 @@ endif ()
 
 
 ## Build configuration
-if (EXISTS "${PROJECT_SOURCE_DIR}/.hg/")
-    # We're in a repo
-    execute_process( COMMAND hg id -t
-                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                     OUTPUT_VARIABLE HG_TAG OUTPUT_STRIP_TRAILING_WHITESPACE )
-    execute_process( COMMAND hg id -i
-                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                     OUTPUT_VARIABLE HG_NODE OUTPUT_STRIP_TRAILING_WHITESPACE )
- elseif (EXISTS "${PROJECT_SOURCE_DIR}/.hg_archival.txt")
-    # Auto-archived tag snapshot of repository
-    file(STRINGS ../.hg_archival.txt HG_TAG
-         REGEX "tag: ")
-    string(SUBSTRING "${HG_TAG}" 5 -1 HG_TAG)
-    file(STRINGS ../.hg_archival.txt HG_NODE
-         REGEX "node: ")
-    string(SUBSTRING "${HG_NODE}" 5 -1 HG_NODE)
-else ()
-    # No idea
-    set (HG_TAG "<unknown version>")
+execute_process(
+    COMMAND git describe --tags
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_DESCRIPTION
+    ERROR_VARIABLE GIT_ERROR
+    RESULT_VARIABLE GIT_RESULT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if (NOT GIT_RESULT EQUAL 0)
+    message(WARNING "Unable to determine program version from git")
+    set(GIT_DESCRIPTION "<unknown version>")
 endif()
+message(STATUS "Version: ${GIT_DESCRIPTION}")
 
-# If not tagged or this revision is tip, use the node ID instead of tag
-string( LENGTH "${HG_TAG}" HG_TAGLEN )
-if ( HG_TAG STREQUAL tip OR NOT HG_TAGLEN )
-    set( HG_TAG "hg ${HG_NODE}" )
-endif ()
-message( STATUS "Version: ${HG_TAG}" )
 
-set (mkg3a_VERSION_TAG ${HG_TAG})
+set (mkg3a_VERSION_TAG ${GIT_DESCRIPTION})
 configure_file (
     config.h.in
     config.h

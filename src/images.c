@@ -101,23 +101,23 @@ u8 *loadBitmap_BMP(FILE *fp, int32_t *width, int32_t *height) {
 
     bh = mallocs(sizeof(*bh));
     dh = mallocs(sizeof(*dh));
-    err = readBMPHeader(bh, dh, fp);
+    if ((err = readBMPHeader(bh, dh, fp))) {
+        goto out;
+    }
     *width = w = dh->width;
     *height = h = dh->height;
+
+    data = mallocs(w * 3 * h);
+    err = readBMPData(dh, data, fp);
+
+out:
     free(bh);
     free(dh);
     if (err) {
-        printf("Error loading image: %s\n", bmperror);
-        return NULL;
-    }
-
-    data = mallocs(w * 3 * h);
-    if (readBMPData(dh, data, fp)) {
-        printf("Error reading image: %s\n", bmperror);
         free(data);
+        printf("Error reading image: %s\n", bmperror);
         return NULL;
     }
-
     return data;
 }
 

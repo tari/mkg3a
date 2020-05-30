@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
         if (t != NULL)
             *t = 0;
 
-        if (realloc(outFN, strlen(outFN) + strlen(".g3a") + 1) == NULL) {
+        if ((outFN = realloc(outFN, strlen(outFN) + strlen(".g3a") + 1)) == NULL) {
             printf("realloc failed on filename (OOM?).  Giving up.\n");
             return 2;
         }

@@ -55,6 +55,7 @@ int g3a_mkG3A(const char *inFile, const char *outFile,
     fseek(outFP, 0, SEEK_SET);
     fwrite(header, sizeof(struct g3a_header), 1, outFP);
 
+    free(header);
     fclose(outFP);
     return 0;
 }

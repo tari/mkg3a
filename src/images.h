@@ -1,6 +1,7 @@
 #ifndef _IMAGES_H
 #define _IMAGES_H
 #include "config.h"
+#include <stdio.h>
 
 #pragma pack(1) /* Padding would be bad, since we oneshot from disk */
 struct bmp_header {

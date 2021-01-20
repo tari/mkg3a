@@ -2,6 +2,7 @@
 #define _G3A_H
 
 #include "config.h"
+#include <stdio.h>
 
 #define G3A_ICON_HEIGHT (64)
 #define G3A_ICON_WIDTH (92)

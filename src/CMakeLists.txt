@@ -70,8 +70,6 @@ add_library (g3a-util STATIC g3a.c util.c)
 
 add_executable (mkg3a mkg3a.c)
 target_link_libraries (mkg3a g3a-util images ${EXTRA_LIBS})
-install (TARGETS mkg3a
-         DESTINATION bin)
 
 add_executable (g3a-icondump g3a-icondump.c)
 target_link_libraries (g3a-icondump images g3a-util)
@@ -81,3 +79,7 @@ target_link_libraries (g3a-updateicon images g3a-util)
 
 add_executable (convert565 convert565.c)
 target_link_libraries (convert565 images g3a-util)
+
+# Install generally useful tools
+install (TARGETS mkg3a g3a-updateicon
+         DESTINATION bin)

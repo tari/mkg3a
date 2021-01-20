@@ -1,6 +1,7 @@
-#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "config.h"
 #include "images.h"
 
@@ -34,6 +35,4 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void usage() {
-    fprintf(stderr, "Usage: convert565 in.bmp out.bin\n");
-}
+void usage() { fprintf(stderr, "Usage: convert565 in.bmp out.bin\n"); }

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+
 #include "config.h"
 
 char *basename(const char *path);

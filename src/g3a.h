@@ -15,8 +15,8 @@ struct icons {
 };
 
 /* Shortcuts to create localized name members */
-#define NAME(lc) char name_ ## lc[0x18]
-#define LNAME(lc) char lname_ ## lc[0x24]
+#define NAME(lc) char name_##lc[0x18]
+#define LNAME(lc) char lname_##lc[0x24]
 
 /* Need struct packing turned off. */
 #pragma pack(1)
@@ -52,8 +52,8 @@ struct g3a_header {
             NAME(fr);
             NAME(pt);
             NAME(zh);
-            NAME(un1);      // Unknown (english?)
-            NAME(un2);      // Unknown (english?)
+            NAME(un1); // Unknown (english?)
+            NAME(un2); // Unknown (english?)
         };
     };
     u8 _pad5[5];
@@ -72,8 +72,8 @@ struct g3a_header {
             LNAME(fr);
             LNAME(pt);
             LNAME(zh);
-            LNAME(un1);      // Unknown (english?)
-            LNAME(un2);      // Unknown (english?)
+            LNAME(un1); // Unknown (english?)
+            LNAME(un2); // Unknown (english?)
         };
     };
     /* 0x0290 Monochrome icon- 64x24, 1 nibble per pixel, 0 or 7 */
@@ -115,9 +115,8 @@ struct lc_names {
 };
 
 /* Creating bits of the file */
-int g3a_mkG3A(const char *inFile, const char *outFile,
-              struct lc_names *names, struct icons *icons,
-              const char *version);
+int g3a_mkG3A(const char *inFile, const char *outFile, struct lc_names *names,
+              struct icons *icons, const char *version);
 struct g3a_header *g3a_mkHeader(int type);
 int g3a_processRaw(const char *inFile, FILE *outFile, u32 *size, u32 *cksum);
 

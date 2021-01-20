@@ -1,10 +1,11 @@
+#include "images.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "config.h"
-#include "images.h"
 #include "util.h"
 
 #if USE_PNG
@@ -13,11 +14,15 @@
 
 static char *bmperror;
 
-#define BMPFAIL(s) { bmperror = s; return 1; }
+#define BMPFAIL(s)                                                             \
+    {                                                                          \
+        bmperror = s;                                                          \
+        return 1;                                                              \
+    }
 
 #if USE_PNG
 u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
-                       int32_t *width_out, int32_t *height_out) {
+                      int32_t *width_out, int32_t *height_out) {
     int32_t bit_depth, color_type;
     unsigned char *imageData = NULL;
     png_bytep *row_pointers = NULL;
@@ -30,7 +35,8 @@ u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
     bit_depth = png_get_bit_depth(png_ptr, info_ptr);
     color_type = png_get_color_type(png_ptr, info_ptr);
     if (bit_depth != 8 || color_type != PNG_COLOR_TYPE_RGB) {
-        fprintf(stderr, "Unsupported PNG bit depth or color type, must be RGB-8\n");
+        fprintf(stderr,
+                "Unsupported PNG bit depth or color type, must be RGB-8\n");
         return NULL;
     }
 
@@ -41,8 +47,7 @@ u8 *readImageData_PNG(png_structp png_ptr, png_infop info_ptr,
     // Read the file now
     imageData = mallocs((w * 3) * h);
     row_pointers = mallocs(sizeof(png_bytep) * h);
-    for (y = 0; y < h; y++)
-    {
+    for (y = 0; y < h; y++) {
         row_pointers[y] = imageData + (w * 3 * y);
     }
     png_read_image(png_ptr, row_pointers);
@@ -56,8 +61,8 @@ u8 *loadBitmap_PNG(FILE *fp, int32_t *width, int32_t *height) {
     int px;
 
     // Allocate basic libpng structures
-    png_structp png_ptr = png_create_read_struct(
-        PNG_LIBPNG_VER_STRING, (png_voidp)NULL, NULL, NULL);
+    png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
+                                                 (png_voidp)NULL, NULL, NULL);
     if (!png_ptr) {
         fprintf(stderr, "Failed to allocate memory for image data.");
         return NULL;
@@ -78,11 +83,10 @@ u8 *loadBitmap_PNG(FILE *fp, int32_t *width, int32_t *height) {
         goto cleanup;
 
     // Convert RGB pixel order to BGR expected by convertBPP later
-    for (px = 0; px < *width * *height * 3; px += 3)
-    {
+    for (px = 0; px < *width * *height * 3; px += 3) {
         u8 t = imageData[px];
-        imageData[px] = imageData[px+2];
-        imageData[px+2] = t;
+        imageData[px] = imageData[px + 2];
+        imageData[px + 2] = t;
     }
 
 cleanup:
@@ -132,12 +136,12 @@ static void dibHeader_convert(struct dib_header *h) {
     h->height = u32_ntole(h->height);
     h->nplanes = u16_ntole(h->nplanes);
     h->bpp = u16_ntole(h->bpp);
-    //h->compress_type = u32_flip(h->compress_type);    // != 0 fails
-    //h->bmp_byte_size = u32_flip(h->bmp_byte_size);    // ignored
-    //h->hres = u32_flip(h->bmp_byte_size);
-    //h->vres = u32_flip(h->vres);
-    //h->ncolors = u32_flip(h->ncolors);                // != 0 fails
-    //h->nimpcolors = u32_flip(h->nimpcolors);            // ignored
+    // h->compress_type = u32_flip(h->compress_type);    // != 0 fails
+    // h->bmp_byte_size = u32_flip(h->bmp_byte_size);    // ignored
+    // h->hres = u32_flip(h->bmp_byte_size);
+    // h->vres = u32_flip(h->vres);
+    // h->ncolors = u32_flip(h->ncolors);                // != 0 fails
+    // h->nimpcolors = u32_flip(h->nimpcolors);            // ignored
 }
 #endif /* IS_BIG_ENDIAN */
 
@@ -148,7 +152,7 @@ int readBMPHeader(struct bmp_header *bh, struct dib_header *h, FILE *fp) {
     sz = fread(bh, 1, sizeof(*bh), fp);
     if (sz != sizeof(*bh))
         BMPFAIL("Strange BMP header");
-    if (bh->signature[0] != 0x42 || bh->signature[1] != 0x4D)    // "BM"
+    if (bh->signature[0] != 0x42 || bh->signature[1] != 0x4D) // "BM"
         BMPFAIL("Not a BMP file");
 
     // DIB header
@@ -221,27 +225,27 @@ u16 *convertBPP(int32_t w, int32_t h, u8 *d) {
     return realloc(d, 2 * w * h);
 }
 
-
 void writeBitmap(const char *path, u16 *data, int w, int h) {
     // TODO: don't write broken files on big-endian systems
     u8 *cdata;
     int x, y;
     u32 imgSize = w * h * 3;
     struct bmp_header bh = {
-        {0x42, 0x4D},                                       // Signature
-        imgSize + sizeof(bh) + sizeof(struct dib_header),   // File size
-        0, 0,                                               // Reserved
-        sizeof(bh) + sizeof(struct dib_header)              // Pixel data offset
+        {0x42, 0x4D},                                     // Signature
+        imgSize + sizeof(bh) + sizeof(struct dib_header), // File size
+        0,
+        0,                                     // Reserved
+        sizeof(bh) + sizeof(struct dib_header) // Pixel data offset
     };
     struct dib_header dh = {
         40,         // DIB header size
-        w, h,       // Dimensions
+        w,       h, // Dimensions
         1,          // Number of planes
         24,         // BPP
         0,          // Compression
         imgSize,    // Pixel array size
-        1, 1,       // Pixels per meter, X/Y
-        0, 0        // Color junk we don't care about
+        1,       1, // Pixels per meter, X/Y
+        0,       0  // Color junk we don't care about
     };
     FILE *fp = fopen(path, "wb");
     if (fp == NULL) {
@@ -303,4 +307,3 @@ u16 *loadBitmap(const char *path, int32_t *width, int32_t *height) {
         return NULL;
     return convertBPP(*width, *height, imgData);
 }
-

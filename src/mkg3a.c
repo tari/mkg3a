@@ -9,10 +9,10 @@
 #include "getopt.h"
 #endif /* HAS_UNISTD_H */
 
-#include "images.h"
 #include "config.h"
 #include "g3a.h"
-    
+#include "images.h"
+
 char *USAGE =
     "\nUsage: mkg3a [OPTION] input-file [output-file]\n\n"
     "  -i (uns|sel):file\n"
@@ -29,14 +29,13 @@ char *USAGE =
     "\nMultiple -n or -i options will all be applied, with the last\n"
     "specified option overriding previous ones with the same key.";
 char *VERSION =
-    "mkg3a " mkg3a_VERSION_TAG
-    " (" __DATE__ " " __TIME__ ")\n"
+    "mkg3a " mkg3a_VERSION_TAG " (" __DATE__ " " __TIME__ ")\n"
     "Copyright (c) 2011 Peter Marheine <peter@taricorp.net>\n"
     "\nThis is free software; see the source for copying conditions.  There\n"
     "is NO warranty; in no event will the authors be held liable for any\n"
     "damages arising from the use of this software.\n"
     "\nSee http://www.taricorp.net/projects/mkg3a/ for updates.";
-    
+
 /*
  * Sets the name in names corresponding to opt, where opt is of the form
  * code:value.
@@ -64,7 +63,7 @@ int storeNameSpec(char *k, char *v, void *dest) {
             }
         }
         if (i >= sizeof(codes) / sizeof(char *))
-            return 1;   // Didn't find lc
+            return 1; // Didn't find lc
     }
     return 0;
 }
@@ -88,8 +87,8 @@ int storeIconSpec(char *k, char *v, void *dest) {
         return 1;
     if (width != G3A_ICON_WIDTH || height != G3A_ICON_HEIGHT) {
         fprintf(stderr, "Dimensions of %s are invalid,", v);
-        fprintf(stderr, " icons must be %ix%i pixels.\n",
-                G3A_ICON_WIDTH, G3A_ICON_HEIGHT);
+        fprintf(stderr, " icons must be %ix%i pixels.\n", G3A_ICON_WIDTH,
+                G3A_ICON_HEIGHT);
         return 1;
     }
     memcpy(cd, idat, sizeof(icons->unselected));
@@ -112,7 +111,7 @@ int splitKV(char *opt, char **k, char **v) {
     *k = opt;
     *v = strdup(t);
     if (*v == NULL)
-        return 1;   // FIXME not descriptive enough
+        return 1; // FIXME not descriptive enough
     return 0;
 }
 
@@ -127,7 +126,8 @@ int splitAndStore(char *opt, int (*handler)(char *, char *, void *),
         // Handler expected to free v if necessary when successful
         failure = handler(k, v, dest);
         if (failure) {
-            printf("Failed to parse option: `%s:%s`.  See previous error.\n", k, v);
+            printf("Failed to parse option: `%s:%s`.  See previous error.\n", k,
+                   v);
             free(v);
             return 2;
         }
@@ -145,9 +145,9 @@ int main(int argc, char **argv) {
     char *version = "01.00.0000";
 
     while ((c = getopt(argc, argv, ":n:i:V:hv")) != -1) {
-        switch(c) {
+        switch (c) {
         case 'h':
-            errors++;   // Force help
+            errors++; // Force help
             break;
         case 'v':
             puts(VERSION);
@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
             errors++;
             break;
         default:
-            assert(0);  // BUG
+            assert(0); // BUG
         }
     }
     args = argc - optind;
@@ -196,7 +196,8 @@ int main(int argc, char **argv) {
         if (t != NULL)
             *t = 0;
 
-        if ((outFN = realloc(outFN, strlen(outFN) + strlen(".g3a") + 1)) == NULL) {
+        if ((outFN = realloc(outFN, strlen(outFN) + strlen(".g3a") + 1)) ==
+            NULL) {
             printf("realloc failed on filename (OOM?).  Giving up.\n");
             return 2;
         }

@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "images.h"
 #include "g3a.h"
+#include "images.h"
 
 int main(int argc, char **argv) {
     struct g3a_header h;

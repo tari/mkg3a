@@ -1,3 +1,5 @@
+#include "g3a.h"
+
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -6,7 +8,6 @@
 #include <string.h>
 #include <time.h>
 
-#include "g3a.h"
 #include "images.h"
 #include "util.h"
 
@@ -18,9 +19,8 @@
  *
  * Returns 0 on success, nonzero otherwise.
  */
-int g3a_mkG3A(const char *inFile, const char *outFile,
-              struct lc_names *names, struct icons *icons,
-              const char *version) {
+int g3a_mkG3A(const char *inFile, const char *outFile, struct lc_names *names,
+              struct icons *icons, const char *version) {
     u32 inSize, cksum;
     struct g3a_header *header;
     const char *baseName;
@@ -65,7 +65,7 @@ int g3a_mkG3A(const char *inFile, const char *outFile,
  */
 void g3a_fillCProt(struct g3a_header *h) {
     u32 *cprot = (u32 *)&h->cprot[2];
-    *cprot = ~h->size;  // Already written big-endian once
+    *cprot = ~h->size; // Already written big-endian once
 
     h->cprot[0] = h->cprot[5] - 0x41;
     h->cprot[1] = 0xFE;
@@ -170,7 +170,8 @@ int g3a_processRaw(const char *inFile, FILE *outFile, u32 *size, u32 *cksum) {
     }
     fseek(inFP, 0, SEEK_END);
     if (ftell(inFP) > 0x01000000) {
-        printf("Cowardly refusing to operating on input file larger than 16MB.\n");
+        printf(
+            "Cowardly refusing to operating on input file larger than 16MB.\n");
         return 1;
     }
     rewind(inFP);

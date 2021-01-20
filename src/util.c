@@ -12,13 +12,12 @@ static __inline u16 u16_flip(u16 v);
  * Get file part of path, returning the beginning of basename or NULL if
  * path is a directory.
  */
-const char *basename(const char *path)
-{
+const char *basename(const char *path) {
     const char *n = strrchr(path, '/');
     if (n == NULL)
         return path;
     else if (strlen(n) == 0)
-            return NULL;
+        return NULL;
     return n;
 }
 
@@ -37,12 +36,10 @@ u32 checksum(const void *ptr, size_t bytes) {
 
 // Flip endianness of v
 static __inline u32 u32_flip(u32 v) {
-    return (v >> 24 & 0xFF) | (v >> 8 & 0xFF00)
-           | (v << 8 & 0xFF0000) | (v << 24 & 0xFF000000);
+    return (v >> 24 & 0xFF) | (v >> 8 & 0xFF00) | (v << 8 & 0xFF0000) |
+           (v << 24 & 0xFF000000);
 }
-static __inline u16 u16_flip(u16 v) {
-    return (v >> 8) | (v << 8 & 0xFF);
-}
+static __inline u16 u16_flip(u16 v) { return (v >> 8) | (v << 8 & 0xFF); }
 
 // Native byte order to big-endian
 u32 u32_ntobe(u32 v) {
@@ -78,13 +75,8 @@ u16 u16_ntole(u16 v) {
 /*
  * Endianness wrappers for dumping non-byte values as big-endian
  */
-void dumpb_u16(u16 v, u16 *loc) {
-    *loc = u16_ntobe(v);
-}
-void dumpb_u32(u32 v, u32 *loc) {
-    *loc = u32_ntobe(v);
-}
-
+void dumpb_u16(u16 v, u16 *loc) { *loc = u16_ntobe(v); }
+void dumpb_u32(u32 v, u32 *loc) { *loc = u32_ntobe(v); }
 
 /*
  * 'safe' wrappers for malloc and friends

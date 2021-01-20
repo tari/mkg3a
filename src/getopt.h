@@ -15,4 +15,4 @@ extern char *optarg;
 
 int getopt(int argc, char **argv, char *opts);
 
-#endif  /* _GETOPT_H_ */
+#endif /* _GETOPT_H_ */

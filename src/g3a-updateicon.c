@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "images.h"
 #include "g3a.h"
+#include "images.h"
 #include "util.h"
 
 int main(int argc, char **argv) {
@@ -49,7 +49,8 @@ int main(int argc, char **argv) {
         return 1;
     }
     if (w != G3A_ICON_WIDTH || h != G3A_ICON_HEIGHT) {
-        printf("Selected image dimensions are incorrect: must be %dx%d", G3A_ICON_WIDTH, G3A_ICON_HEIGHT);
+        printf("Selected image dimensions are incorrect: must be %dx%d",
+               G3A_ICON_WIDTH, G3A_ICON_HEIGHT);
         return 1;
     }
     if ((unsel_data = loadBitmap(argv[3], &w, &h)) == NULL) {
@@ -57,13 +58,16 @@ int main(int argc, char **argv) {
         return 1;
     }
     if (w != G3A_ICON_WIDTH || h != G3A_ICON_HEIGHT) {
-        printf("Unselected image dimensions are incorrect: must be %dx%d", G3A_ICON_WIDTH, G3A_ICON_HEIGHT);
+        printf("Unselected image dimensions are incorrect: must be %dx%d",
+               G3A_ICON_WIDTH, G3A_ICON_HEIGHT);
         return 1;
     }
 
     // Write new icons
-    memcpy(file_contents + offsetof(struct g3a_header, icon_sel), sel_data, sizeof(*unsel_data) * (G3A_ICON_WIDTH * G3A_ICON_HEIGHT));
-    memcpy(file_contents + offsetof(struct g3a_header, icon_unsel), unsel_data, sizeof(*unsel_data) * (G3A_ICON_WIDTH * G3A_ICON_HEIGHT));
+    memcpy(file_contents + offsetof(struct g3a_header, icon_sel), sel_data,
+           sizeof(*unsel_data) * (G3A_ICON_WIDTH * G3A_ICON_HEIGHT));
+    memcpy(file_contents + offsetof(struct g3a_header, icon_unsel), unsel_data,
+           sizeof(*unsel_data) * (G3A_ICON_WIDTH * G3A_ICON_HEIGHT));
 
     // Zero the checksums in the header and at end of file
     memset(file_contents + offsetof(struct g3a_header, cksum), 0, 4);

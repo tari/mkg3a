@@ -76,5 +76,8 @@ install (TARGETS mkg3a
 add_executable (g3a-icondump g3a-icondump.c)
 target_link_libraries (g3a-icondump images g3a-util)
 
+add_executable (g3a-updateicon g3a-updateicon.c)
+target_link_libraries (g3a-updateicon images g3a-util)
+
 add_executable (convert565 convert565.c)
 target_link_libraries (convert565 images g3a-util)
